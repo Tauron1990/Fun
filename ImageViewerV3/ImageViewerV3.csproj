@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EcsRx.Infrastructure.Ninject" Version="3.5.41" />
+    <PackageReference Include="EcsRx.Plugins.Computeds" Version="3.5.41" />
+    <PackageReference Include="EcsRx.Plugins.ReactiveSystems" Version="3.5.41" />
+    <PackageReference Include="EcsRx.Plugins.Views" Version="3.5.41" />
+    <PackageReference Include="EcsRx.ReactiveData" Version="3.5.41" />
+    <PackageReference Include="JetBrains.Annotations" Version="2019.1.3" />
+    <PackageReference Include="Syncfusion.SfBusyIndicator.WPF" Version="17.4.0.44" />
+    <PackageReference Include="Syncfusion.SfChromelessWindow.WPF" Version="17.4.0.44" />
+    <PackageReference Include="Syncfusion.SfSkinManager.WPF" Version="17.4.0.44" />
+    <PackageReference Include="Syncfusion.Shared.WPF" Version="17.4.0.44" />
+    <PackageReference Include="Syncfusion.Themes.Metro.WPF" Version="17.4.0.44" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Ecs\Events\" />
+    <Folder Include="Ecs\Systems\" />
+  </ItemGroup>
+
+</Project>
