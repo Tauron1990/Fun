@@ -22,9 +22,4 @@
     <PackageReference Include="Syncfusion.Themes.Metro.WPF" Version="17.4.0.44" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Ecs\Events\" />
-    <Folder Include="Ecs\Systems\" />
-  </ItemGroup>
-
 </Project>

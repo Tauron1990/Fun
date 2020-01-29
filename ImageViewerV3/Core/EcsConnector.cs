@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using EcsRx.Collections;
 using EcsRx.Events;
+using EcsRx.Plugins.Computeds;
 using EcsRx.ReactiveData;
 using JetBrains.Annotations;
 using Ninject;
@@ -20,7 +21,13 @@ namespace ImageViewerV3.Core
         protected virtual void OnPropertyChanged([CallerMemberName] [CanBeNull] string? propertyName = null) 
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        public ReactiveProperty<TData> Track<TData>(ReactiveProperty<TData> data, string name)
+        protected ReactiveProperty<TData> Track<TData>(IComputed<TData> data, string name)
+        {
+            var prop = new ReactiveProperty<TData>(data);
+            return Track(prop, name);
+        }
+
+        protected ReactiveProperty<TData> Track<TData>(ReactiveProperty<TData> data, string name)
         {
             data.Subscribe(_ => OnPropertyChanged(name));
             return data;

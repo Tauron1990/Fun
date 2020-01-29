@@ -14,7 +14,12 @@ using EcsRx.Infrastructure.Extensions;
 using EcsRx.Infrastructure.Ninject;
 using EcsRx.Plugins.Computeds;
 using EcsRx.Plugins.ReactiveSystems;
+using EcsRx.Plugins.ReactiveSystems.Extensions;
 using EcsRx.Plugins.Views;
+using EcsRx.Plugins.Views.Extensions;
+using ImageViewerV3.Ecs;
+using ImageViewerV3.Ecs.Systems;
+using ImageViewerV3.Ui;
 using Ninject;
 using Syncfusion.Licensing;
 
@@ -39,15 +44,25 @@ namespace ImageViewerV3
 
             protected override void BindSystems()
             {
+                EntityCollectionManager.CreateCollection(Collections.Data);
+                EntityCollectionManager.CreateCollection(Collections.Gui);
+                EntityCollectionManager.CreateCollection(Collections.Images);
             }
 
-            protected override void ApplicationStarted() 
-                => Container.Bind<IEntityCollection>(builder => builder.ToInstance(EntityCollectionManager.CreateCollection(1)));
+            protected override void StartSystems() 
+                => this.StartAllBoundViewSystems();
+
+            
+
+            protected override void ApplicationStarted()
+            {
+
+            }
 
             public override IDependencyContainer Container { get; }
         }
 
-        public static readonly IKernel Kernel = new StandardKernel();
+        public static readonly IKernel Kernel = new StandardKernel(new SystemModule(), new UiModule());
         private readonly EcsApp _app = new EcsApp(Kernel);
 
         public App() 

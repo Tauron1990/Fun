@@ -5,13 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:window="clr-namespace:Syncfusion.Windows.Controls;assembly=Syncfusion.SfChromelessWindow.Wpf"
         xmlns:skin="clr-namespace:Syncfusion.SfSkinManager;assembly=Syncfusion.SfSkinManager.WPF"
-        xmlns:local="clr-namespace:ImageViewerV3"
+        xmlns:local="clr-namespace:ImageViewerV3.Ui"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         mc:Ignorable="d" skin:SfSkinManager.VisualStyle="Metro"
-        Title="MainWindow" Height="450" Width="800" WindowState="Maximized">
-    <syncfusion:SfBusyIndicator>
+        d:DataContext="{d:DesignInstance local:MainWindowConnector}"
+        Title="Image Viewer" Height="450" Width="800" WindowState="Maximized">
+    <syncfusion:SfBusyIndicator IsBusy="{Binding OperationManager.IsRunning}" Header="{Binding OperationManager.Message}">
         <Grid>
-            
+            <Button Content="Test" VerticalAlignment="Center" HorizontalAlignment="Center" Command="{Binding TestOp}"/>
         </Grid>
     </syncfusion:SfBusyIndicator>
 </window:SfChromelessWindow>
