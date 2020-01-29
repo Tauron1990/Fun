@@ -10,6 +10,7 @@ using EcsRx.ReactiveData;
 using ImageViewerV3.Core;
 using ImageViewerV3.Ecs;
 using ImageViewerV3.Ecs.Components;
+using ImageViewerV3.Ecs.Components.Operations;
 
 namespace ImageViewerV3.Ui.Services
 {
@@ -17,23 +18,25 @@ namespace ImageViewerV3.Ui.Services
     {
         private class OperationMsgStade : ComputedFromGroup<string>
         {
-            public OperationMsgStade(IEntityCollectionManager manager)
-                : base(manager.GetObservableGroup(OperationStade.OpGroup, Collections.Gui))
-            {
-            }
+            private static readonly IGroup OpGroup = new Group(typeof(OperationComponent), typeof(OperationRunningComponent));
 
-            public override IObservable<bool> RefreshWhen()
-            {
-                return InternalObservableGroup.OnEntityAdded.Concat(InternalObservableGroup.OnEntityRemoved).Select(_ => true);
-            }
+            public OperationMsgStade(IEntityCollectionManager manager)
+                : base(manager.GetObservableGroup(OpGroup, Collections.Gui))
+            { }
+
+            public override IObservable<bool> RefreshWhen() 
+                => InternalObservableGroup.OnEntityAdded.Merge(InternalObservableGroup.OnEntityRemoved).Select(_ => true);
 
             public override string Transform(IObservableGroup observableGroup)
-                => observableGroup.Select(e => e.GetComponent<OperationComponent>()).FirstOrDefault()?.Message ?? string.Empty;
+                => observableGroup
+                       .Where(e => e.HasComponent<OperationRunningComponent>())
+                       .Select(e => e.GetComponent<OperationComponent>())
+                       .FirstOrDefault()?.Message ?? string.Empty;
         }
 
         private class OperationStade : ComputedFromGroup<bool>
         {
-            public static readonly IGroup OpGroup = new Group(new []{typeof(OperationComponent)});
+            private static readonly IGroup OpGroup = new Group(new []{typeof(OperationComponent)});
 
             public OperationStade(IEntityCollectionManager manager) 
                 : base(manager.GetObservableGroup(OpGroup, Collections.Gui))
@@ -42,11 +45,11 @@ namespace ImageViewerV3.Ui.Services
 
             public override IObservable<bool> RefreshWhen()
             {
-                return InternalObservableGroup.OnEntityAdded.Concat(InternalObservableGroup.OnEntityRemoved).Select(_ => true);
+                return InternalObservableGroup.OnEntityAdded.Merge(InternalObservableGroup.OnEntityRemoved).Select(_ => true);
             }
 
             public override bool Transform(IObservableGroup observableGroup) 
-                => observableGroup.Select(e => e.GetComponent<OperationComponent>()).Any(c => c.IsActive);
+                => observableGroup.Any(e => e.HasComponent<OperationComponent>());
         }
         
         public OperationManager(IEntityCollectionManager entityCollectionManager)

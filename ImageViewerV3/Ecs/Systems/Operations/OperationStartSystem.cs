@@ -4,7 +4,7 @@ using EcsRx.Plugins.ReactiveSystems.Custom;
 using ImageViewerV3.Ecs.Blueprints;
 using ImageViewerV3.Ecs.Events;
 
-namespace ImageViewerV3.Ecs.Systems
+namespace ImageViewerV3.Ecs.Systems.Operations
 {
     public sealed class OperationStartSystem : EventReactionSystem<StartOperationEvent>
     {

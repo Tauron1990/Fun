@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -13,9 +15,11 @@ using Syncfusion.Windows.Shared;
 
 namespace ImageViewerV3.Core
 {
-    public abstract class EcsConnector : INotifyPropertyChanged
+    public abstract class EcsConnector : INotifyPropertyChanged, IDisposable
     {
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        private CompositeDisposable _compositeDisposable = new CompositeDisposable();
 
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] [CanBeNull] string? propertyName = null) 
@@ -29,11 +33,11 @@ namespace ImageViewerV3.Core
 
         protected ReactiveProperty<TData> Track<TData>(ReactiveProperty<TData> data, string name)
         {
-            data.Subscribe(_ => OnPropertyChanged(name));
+            _compositeDisposable.Add(data.Subscribe(_ => OnPropertyChanged(name)));
             return data;
         }
 
-        public ICommand BindToEvent<TEvent>(Func<IKernel, IEntityCollectionManager, TEvent> exec, Func<IKernel, IEntityCollectionManager, bool>? canExec = null)
+        protected ICommand BindToEvent<TEvent>(Func<IKernel, IEntityCollectionManager, TEvent> exec, Func<IKernel, IEntityCollectionManager, bool>? canExec = null)
         {
             var manager = App.Kernel.Get<IEntityCollectionManager>();
             var eventSystem = App.Kernel.Get<IEventSystem>();
@@ -50,13 +54,13 @@ namespace ImageViewerV3.Core
             // ReSharper disable once ImplicitlyCapturedClosure
             bool CanExec(object arg)
             {
-                if (canExec == null)
-                    return true;
-
-                return canExec(App.Kernel, manager);
+                return canExec == null || canExec(App.Kernel, manager);
             }
 
             return new DelegateCommand(Exec, CanExec);
         }
+
+        public void Dispose() 
+            => _compositeDisposable.Dispose();
     }
 }

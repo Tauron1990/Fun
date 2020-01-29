@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ImageViewerV3.Ui;
+using Ninject;
 
 namespace ImageViewerV3
 {
@@ -23,6 +25,7 @@ namespace ImageViewerV3
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = App.Kernel.Get<MainWindowConnector>();
         }
     }
 }
