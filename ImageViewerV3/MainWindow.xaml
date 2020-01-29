@@ -8,11 +8,26 @@
         xmlns:local="clr-namespace:ImageViewerV3.Ui"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         mc:Ignorable="d" skin:SfSkinManager.VisualStyle="Metro"
-        d:DataContext="{d:DesignInstance local:MainWindowConnector}"
+        d:DataContext="{d:DesignInstance local:MainWindowConnector}" Icon="instagram.ico"
         Title="Image Viewer" Height="450" Width="800" WindowState="Maximized">
     <syncfusion:SfBusyIndicator IsBusy="{Binding OperationManager.IsRunning}" Header="{Binding OperationManager.Message}">
         <Grid>
-            <Button Content="Test" VerticalAlignment="Center" HorizontalAlignment="Center" Command="{Binding TestOp}"/>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition />
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <syncfusion:MenuAdv Grid.ColumnSpan="3">
+                <syncfusion:MenuItemAdv Header="Datei">
+                    <syncfusion:MenuItemAdv Header="Öffnen"/>
+                </syncfusion:MenuItemAdv>
+            </syncfusion:MenuAdv>
         </Grid>
     </syncfusion:SfBusyIndicator>
 </window:SfChromelessWindow>
