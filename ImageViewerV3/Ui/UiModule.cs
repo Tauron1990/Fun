@@ -9,6 +9,7 @@ namespace ImageViewerV3.Ui
         {
             Bind<MainWindowConnector>().ToSelf();
             Bind<OperationManager>().ToSelf();
+            Bind<FilesManager>().ToSelf();
         }
     }
 }

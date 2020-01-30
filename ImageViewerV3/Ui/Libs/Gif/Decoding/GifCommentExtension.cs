@@ -7,7 +7,7 @@ namespace ImageViewerV3.Ui.Libs.Gif.Decoding
     {
         internal const int ExtensionLabel = 0xFE;
 
-        private string? Text { get; set; }
+        public string? Text { get; set; }
 
         private GifCommentExtension()
         {

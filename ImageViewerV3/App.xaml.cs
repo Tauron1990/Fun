@@ -17,7 +17,9 @@ using EcsRx.Plugins.ReactiveSystems;
 using EcsRx.Plugins.ReactiveSystems.Extensions;
 using EcsRx.Plugins.Views;
 using EcsRx.Plugins.Views.Extensions;
+using ImageViewerV3.Data;
 using ImageViewerV3.Ecs;
+using ImageViewerV3.Ecs.Blueprints;
 using ImageViewerV3.Ecs.Systems;
 using ImageViewerV3.Ui;
 using Ninject;
@@ -28,7 +30,7 @@ namespace ImageViewerV3
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App
     {
         private class EcsApp : EcsRxApplication
         {
@@ -62,7 +64,11 @@ namespace ImageViewerV3
             public override IDependencyContainer Container { get; }
         }
 
-        public static readonly IKernel Kernel = new StandardKernel(new SystemModule(), new UiModule());
+        public static readonly IKernel Kernel = new StandardKernel(
+            new SystemModule(), 
+            new UiModule(), 
+            new DataModule(),
+            new BlueprintModule());
         private readonly EcsApp _app = new EcsApp(Kernel);
 
         public App() 

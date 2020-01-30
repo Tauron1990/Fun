@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -10,16 +9,24 @@ using EcsRx.Events;
 using EcsRx.Plugins.Computeds;
 using EcsRx.ReactiveData;
 using JetBrains.Annotations;
-using Ninject;
 using Syncfusion.Windows.Shared;
 
 namespace ImageViewerV3.Core
 {
+    [PublicAPI]
     public abstract class EcsConnector : INotifyPropertyChanged, IDisposable
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
         private CompositeDisposable _compositeDisposable = new CompositeDisposable();
+        private readonly IEntityCollectionManager _entityCollectionManager;
+        private readonly IEventSystem _eventSystem;
+
+        protected EcsConnector(IEntityCollectionManager entityCollectionManager, IEventSystem eventSystem)
+        {
+            _entityCollectionManager = entityCollectionManager;
+            _eventSystem = eventSystem;
+        }
 
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] [CanBeNull] string? propertyName = null) 
@@ -37,29 +44,37 @@ namespace ImageViewerV3.Core
             return data;
         }
 
-        protected ICommand BindToEvent<TEvent>(Func<IKernel, IEntityCollectionManager, TEvent> exec, Func<IKernel, IEntityCollectionManager, bool>? canExec = null)
+        protected ICommand BindToEvent<TEvent>(Func<IEntityCollectionManager, TEvent?> exec, Func<IEntityCollectionManager, bool>? canExec = null)
+            where TEvent : class
         {
-            var manager = App.Kernel.Get<IEntityCollectionManager>();
-            var eventSystem = App.Kernel.Get<IEventSystem>();
+            var manager = _entityCollectionManager;
 
             // ReSharper disable once ImplicitlyCapturedClosure
             async void Exec(object arg) =>
                 await Task.Run(() =>
                 {
-                    var e = exec(App.Kernel, manager);
+                    var e = exec(manager);
+                    if(e == null)
+                        return;
 
-                    eventSystem.Publish(e);
+                    _eventSystem.Publish(e);
                 });
 
             // ReSharper disable once ImplicitlyCapturedClosure
             bool CanExec(object arg)
             {
-                return canExec == null || canExec(App.Kernel, manager);
+                return canExec == null || canExec(manager);
             }
 
             return new DelegateCommand(Exec, CanExec);
         }
 
+        protected TType DisposeThis<TType>(TType toDispose)
+            where TType : IDisposable
+        {
+            _compositeDisposable.Add(toDispose);
+            return toDispose;
+        }
         public void Dispose() 
             => _compositeDisposable.Dispose();
     }

@@ -4,9 +4,9 @@ namespace ImageViewerV3.Ui.Libs.Gif.Decoding
 {
     internal class GifHeader : GifBlock
     {
-        public string Signature { get; private set; }
-        public string Version { get; private set; }
-        public GifLogicalScreenDescriptor LogicalScreenDescriptor { get; private set; }
+        public string? Signature { get; set; }
+        public string? Version { get; set; }
+        public GifLogicalScreenDescriptor? LogicalScreenDescriptor { get; private set; }
 
         private GifHeader()
         {

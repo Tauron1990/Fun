@@ -7,9 +7,9 @@ namespace ImageViewerV3.Ui.Libs.Gif.Decoding
     internal class GifFile
     {
         public GifHeader? Header { get; private set; }
-        private GifColor[]? GlobalColorTable { get; set; }
+        public GifColor[]? GlobalColorTable { get; set; }
         public IList<GifFrame>? Frames { get; private set; }
-        private IList<GifExtension>? Extensions { get; set; }
+        public IList<GifExtension>? Extensions { get; set; }
         public ushort RepeatCount { get; private set; }
 
         private GifFile()
@@ -27,7 +27,7 @@ namespace ImageViewerV3.Ui.Libs.Gif.Decoding
         {
             Header = GifHeader.ReadHeader(stream);
 
-            if (Header.LogicalScreenDescriptor.HasGlobalColorTable) 
+            if (Header.LogicalScreenDescriptor?.HasGlobalColorTable == true) 
                 GlobalColorTable = GifHelpers.ReadColorTable(stream, Header.LogicalScreenDescriptor.GlobalColorTableSize);
             ReadFrames(stream, metadataOnly);
 

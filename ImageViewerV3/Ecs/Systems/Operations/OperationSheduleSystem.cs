@@ -51,7 +51,8 @@ namespace ImageViewerV3.Ecs.Systems.Operations
         private async Task MessageQueueOnWork(IEntity arg)
         {
             arg.AddComponent<OperationRunningComponent>();
-            await arg.GetComponent<OperationComponent>().Task();
+            var component = arg.GetComponent<OperationComponent>(); 
+            await component.Task(component.Data);
             _manager.RemoveEntity(arg);
         }
 

@@ -4,8 +4,8 @@ namespace ImageViewerV3.Ui.Libs.Gif.Decoding
 {
     internal class GifImageData
     {
-        public byte LzwMinimumCodeSize { get; set; }
-        public byte[] CompressedData { get; set; }
+        public byte? LzwMinimumCodeSize { get; set; }
+        public byte[]? CompressedData { get; set; }
 
         private GifImageData()
         {

@@ -9,13 +9,10 @@ namespace ImageViewerV3.Ui.Libs.Gif.Decoding
             B = b;
         }
 
-        private byte R { get; }
-        private byte G { get; }
-        private byte B { get; }
+        public byte R { get; }
+        public byte G { get; }
+        public byte B { get; }
 
-        public override string ToString()
-        {
-            return $"#{R:x2}{G:x2}{B:x2}";
-        }
+        public override string ToString() => $"#{R:x2}{G:x2}{B:x2}";
     }
 }

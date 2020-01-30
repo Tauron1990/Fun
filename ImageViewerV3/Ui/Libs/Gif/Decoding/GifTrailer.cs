@@ -8,14 +8,8 @@ namespace ImageViewerV3.Ui.Libs.Gif.Decoding
         {
         }
 
-        internal override GifBlockKind Kind
-        {
-            get { return GifBlockKind.Other; }
-        }
+        internal override GifBlockKind Kind => GifBlockKind.Other;
 
-        internal static GifTrailer ReadTrailer()
-        {
-            return new GifTrailer();
-        }
+        internal static GifTrailer ReadTrailer() => new GifTrailer();
     }
 }

@@ -9,7 +9,7 @@ namespace ImageViewerV3.Ui.Libs.Gif.Decoding
     {
         internal const int ExtensionLabel = 0xFF;
 
-        private int BlockSize { get; set; }
+        public int BlockSize { get; set; }
         public string? ApplicationIdentifier { get; private set; }
         public byte[]? AuthenticationCode { get; private set; }
         public byte[]? Data { get; private set; }
