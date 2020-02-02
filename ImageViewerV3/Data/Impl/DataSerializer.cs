@@ -43,7 +43,11 @@ namespace ImageViewerV3.Data.Impl
         {
             _lastCollection = to;
             _last = path;
+
             var targetPath = GetFullPath(path);
+
+            if(!File.Exists(targetPath))
+                return;
 
             var obj = JObject.Parse(File.ReadAllText(targetPath));
             foreach (var property in obj.Properties())
@@ -60,7 +64,7 @@ namespace ImageViewerV3.Data.Impl
 
         public void Save()
         {
-            if(_lastCollection == null) return;
+            if(_lastCollection == null || string.IsNullOrWhiteSpace(_last)) return;
             var path = GetFullPath(_last);
 
             var types = new Dictionary<string, GuardJObject>();

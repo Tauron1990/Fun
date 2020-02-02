@@ -68,7 +68,8 @@ namespace ImageViewerV3
             new SystemModule(), 
             new UiModule(), 
             new DataModule(),
-            new BlueprintModule());
+            new BlueprintModule(),
+            new EcsModule());
         private readonly EcsApp _app = new EcsApp(Kernel);
 
         public App() 

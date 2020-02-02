@@ -54,20 +54,15 @@ namespace ImageViewerV3.Ui.Services
             public override bool Transform(IObservableGroup observableGroup) 
                 => observableGroup.Any(e => e.HasComponent<OperationComponent>());
         }
-        
-        private readonly SourceCache<IEntity, int> _operationCache = new SourceCache<IEntity, int>(entry => entry.Id);
 
         public OperationManager(IEntityCollectionManager entityCollectionManager, IEventSystem eventSystem)
             : base(entityCollectionManager, eventSystem)
         {
             var group = new Group(typeof(OperationComponent));
-            var obserGroup = entityCollectionManager.GetObservableGroup(group, Collections.Gui);
-            DisposeThis(obserGroup.OnEntityAdded.Subscribe(e => _operationCache.AddOrUpdate(e)));
-            DisposeThis(obserGroup.OnEntityRemoved.Subscribe(e => _operationCache.Remove(e)));
-
+            var operationCache = DisposeThis(new GroupToCache(entityCollectionManager, @group, Collections.Gui));
 
             DisposeThis(    
-                DisposeThis(_operationCache)
+                DisposeThis(operationCache)
                     .Connect()
                     .Transform(e => e.GetComponent<OperationComponent>())
                     .Transform(c => new OperationEntry(c.Message, c.OpsId))

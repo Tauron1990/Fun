@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Input;
 using EcsRx.Collections;
 using EcsRx.Events;
@@ -11,14 +12,20 @@ namespace ImageViewerV3.Ui
 {
     public class MainWindowConnector : EcsConnector
     {
+        private int _fileListIndex;
         public OperationManager OperationManager { get; }
         public FilesManager FilesManager { get; }
+        public ImageManager ImageManager { get; }
 
         public MainWindowConnector(IEntityCollectionManager entityCollectionManager, IEventSystem eventSystem,
-            OperationManager manager, FilesManager filesManager) : base(entityCollectionManager, eventSystem)
+                                   OperationManager manager, FilesManager filesManager, ImageManager imageManager) : base(entityCollectionManager, eventSystem)
         {
+            DisposeThis(eventSystem.Receive<PrepareLoadEvent>().Subscribe(_ => FileListIndex = 0));
+            DisposeThis(filesManager.StartFilter.Subscribe(_ => FileListIndex = 1));
+
             OperationManager = manager;
             FilesManager = filesManager;
+            ImageManager = imageManager;
 
             OpenLocationCommand = BindToEvent(OpenLocation);
         }
@@ -31,7 +38,18 @@ namespace ImageViewerV3.Ui
                 Description = "Ordner mit Bildern"
             };
 
-            return dialog.ShowDialog(Application.Current.MainWindow) == true ? new BeginLoadingEvent(dialog.SelectedPath) : null;
+            return Application.Current.Dispatcher != null && Application.Current.Dispatcher.Invoke(() => dialog.ShowDialog(Application.Current.MainWindow)) == true ? new BeginLoadingEvent(dialog.SelectedPath) : null;
+        }
+
+        public int FileListIndex
+        {
+            get => _fileListIndex;
+            set
+            {
+                if(_fileListIndex == value) return;
+                _fileListIndex = value;
+                OnPropertyChanged();
+            }
         }
 
         public ICommand OpenLocationCommand { get; }

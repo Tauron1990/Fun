@@ -9,15 +9,20 @@ namespace ImageViewerV3.Ecs.Components.Image
 
         public string Name { get; } = string.Empty;
 
+        public int Index { get; }
+
         public ImageComponent()
         {
             
         }
 
-        public ImageComponent(string filePath)
+        public ImageComponent(string filePath, int index)
         {
             FilePath = filePath;
+            Index = index;
             Name = Path.GetFileName(filePath);
         }
+
+        public override string ToString() => Name;
     }
 }

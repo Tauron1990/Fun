@@ -36,14 +36,20 @@
                         <syncfusion:MenuItemAdv Header="Öffnen" Command="{Binding OpenLocationCommand}"/>
                     </syncfusion:MenuItemAdv>
                 </syncfusion:MenuAdv>
-                <TabControl Grid.Row="1" Grid.Column="0" MinWidth="200" Margin="5">
-                    <TabItem Header="Favoriten" />
-                    <TabItem Header="Daten" />
-                    <TabItem Header="Suche" />
+                <TabControl Grid.Row="1" Grid.Column="0" MinWidth="200" Margin="5" SelectedIndex="{Binding FileListIndex}">
+                    <TabItem Header="Daten">
+                        <ListBox ItemsSource="{Binding FilesManager.Files}"/>
+                    </TabItem>
+                    <TabItem Header="Suche">
+                        <ListBox ItemsSource="{Binding FilesManager.Filtered}"/>
+                    </TabItem>
+                    <TabItem Header="Favoriten">
+                        <ListBox ItemsSource="{Binding FilesManager.Favorites}"/>
+                    </TabItem>
                 </TabControl>
                 <StackPanel Grid.Row="2" Grid.Column="0">
-                    <TextBox Margin="5" />
-                    <Button Margin="5" HorizontalAlignment="Right">
+                    <TextBox Margin="5" Text="{Binding FilesManager.Filter, Delay=300, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Margin="5" HorizontalAlignment="Right" Command="{Binding FilesManager.StartFilter}">
                         <Image Source="Resources/if_icon-111-search_314478.png" Height="20" />
                     </Button>
                 </StackPanel>

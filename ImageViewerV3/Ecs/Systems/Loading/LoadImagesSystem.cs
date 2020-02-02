@@ -33,13 +33,15 @@ namespace ImageViewerV3.Ecs.Systems.Loading
 
         public override void EventTriggered(LoadImagesEvent eventData)
         {
+            var index = 0;
+
             foreach (var file in Directory.EnumerateFiles(eventData.Path)
                                             .Where(p =>
                                             {
                                                 var mime = MimeTypes.GetMimeType(Path.GetFileName(p));
                                                 return mime.StartsWith("image") || mime.StartsWith("video") || mime.StartsWith("audio");
                                             }).OrderBy(Path.GetFileName, NaturalStringComparer.Comparer)) 
-                _collection.CreateEntity(new ImageBlueprint(file));
+                _collection.CreateEntity(new ImageBlueprint(file, index++));
         }
 
 

@@ -39,8 +39,10 @@ namespace ImageViewerV3.Ecs.Systems.Loading
             RemoveAllEntitys(_dataCollection);
             RemoveAllEntitys(_imageCollection);
 
+            EventSystem.Publish(new PrepareLoadEvent());
             EventSystem.Publish(new LoadDataEvent(eventData.Location));
             EventSystem.Publish(new LoadImagesEvent(eventData.Location));
+            EventSystem.Publish(new PostLoadingEvent());
 
             return Task.CompletedTask;
         }
