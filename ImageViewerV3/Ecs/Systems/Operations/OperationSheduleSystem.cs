@@ -34,7 +34,7 @@ namespace ImageViewerV3.Ecs.Systems.Operations
                 => _next(value);
         }
 
-        private readonly MessageQueue<IEntity> _messageQueue = new MessageQueue<IEntity>();
+        private readonly MessageQueue<IEntity> _messageQueue = new MessageQueue<IEntity>(skipExceptions:false);
 
         public IGroup Group { get; } = new Group(null, new []{ typeof(OperationComponent) }, new []{typeof(OperationRunningComponent)});
 

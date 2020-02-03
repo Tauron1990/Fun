@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EcsRx.Collections;
@@ -46,19 +47,34 @@ namespace ImageViewerV3.Data.Impl
 
             var targetPath = GetFullPath(path);
 
-            if(!File.Exists(targetPath))
+            if (!File.Exists(targetPath))
                 return;
 
-            var obj = JObject.Parse(File.ReadAllText(targetPath));
-            foreach (var property in obj.Properties())
+
+            try
             {
-                var blue = _blueprintDescriptors.FirstOrDefault(bd => bd.Name == property.Name) 
-                           ?? _blueprintDescriptors.First(bd => bd.Name == "general");
+                var obj = JObject.Parse(File.ReadAllText(targetPath));
+                foreach (var property in obj.Properties())
+                {
+                    var blue = _blueprintDescriptors.FirstOrDefault(bd => bd.Name == property.Name) 
+                               ?? _blueprintDescriptors.First(bd => bd.Name == "general");
 
-                var jValue = (JObject) property.Value;
-                var blueprint = blue.Create(jValue.Value<string>("Name"), jValue.Value<string>("Value"));
+                    var jValue = (JArray) property.Value;
+                    var blueprint = blue.Create(jValue.First.Value<string>("Name"), jValue.First.Value<string>("Value"));
 
-                to.CreateEntity(blueprint);
+                    to.CreateEntity(blueprint);
+                }
+            }
+            catch 
+            {
+                try
+                {
+                    File.Delete(targetPath);
+                }
+                catch(IOException)
+                {
+                    
+                }
             }
         }
 
@@ -86,8 +102,8 @@ namespace ImageViewerV3.Data.Impl
             }
 
             var obj = new JObject(types.Select(kp => new JProperty(kp.Key, kp.Value.Array)));
-            using var stream = new FileStream(path, FileMode.Create);
-            obj.WriteTo(new JsonTextWriter(new StreamWriter(stream)));
+
+            File.WriteAllText(path, obj.ToString(Formatting.Indented));
         }
 
         private static string GetFullPath(string location) 

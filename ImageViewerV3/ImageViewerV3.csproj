@@ -44,6 +44,9 @@
     <PackageReference Include="Syncfusion.SfSkinManager.WPF" Version="17.4.0.46" />
     <PackageReference Include="Syncfusion.Shared.WPF" Version="17.4.0.46" />
     <PackageReference Include="Syncfusion.Themes.Metro.WPF" Version="17.4.0.46" />
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.8.1" />
+    <PackageReference Include="Vlc.DotNet.Core" Version="3.1.0-develop364" />
+    <PackageReference Include="Vlc.DotNet.Core.Interops" Version="3.1.0-develop364" />
   </ItemGroup>
 
   <ItemGroup>
@@ -58,6 +61,10 @@
     <Resource Include="Resources\if_view-fullscreen_118800.png" />
     <Resource Include="Resources\star - empty.png" />
     <Resource Include="Resources\star.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Vlc\" />
   </ItemGroup>
 
 </Project>

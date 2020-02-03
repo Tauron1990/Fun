@@ -32,6 +32,7 @@ namespace ImageViewerV3.Ui
 
         private BeginLoadingEvent? OpenLocation(IEntityCollectionManager manager)
         {
+            //.libvlc\win - x64
             var dialog = new VistaFolderBrowserDialog
             {
                 ShowNewFolderButton = false,

@@ -58,7 +58,7 @@ namespace ImageViewerV3
 
             protected override void ApplicationStarted()
             {
-
+                
             }
 
             public override IDependencyContainer Container { get; }
