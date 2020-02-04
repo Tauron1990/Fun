@@ -13,7 +13,6 @@ using EcsRx.Groups;
 using EcsRx.Groups.Observable;
 using EcsRx.Plugins.Computeds;
 using EcsRx.ReactiveData;
-using ImageViewerV3.Data;
 using ImageViewerV3.Ecs.Components.Data;
 using ImageViewerV3.Ecs.Components.Image;
 using ImageViewerV3.Ecs.Events;
@@ -99,7 +98,7 @@ namespace ImageViewerV3.Ecs.Services
         public ReactiveProperty<int> CurrentIndex { get; } = new ReactiveProperty<int>(0);
 
 
-        public FolderConfiguration(IEntityCollectionManager entityCollectionManager, IEventSystem eventSystem, IDataSerializer dataSerializer)
+        public FolderConfiguration(IEntityCollectionManager entityCollectionManager, IEventSystem eventSystem)
         {
             _disposable.Add(eventSystem.Receive<PostLoadingEvent>().Subscribe(CheckSettings));
 
