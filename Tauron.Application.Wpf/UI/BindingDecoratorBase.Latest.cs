@@ -75,7 +75,7 @@ namespace Tauron.Application.Wpf.UI
         /// </summary>
         [NotNull]
         [Browsable(false)]
-        public Binding Binding { get; set; } = new Binding();
+        public System.Windows.Data.Binding Binding { get; set; } = new System.Windows.Data.Binding();
 
 
         [CanBeNull]

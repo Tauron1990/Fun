@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
+using ProcessManager.Services;
+using ProcessManager.Views;
 using Tauron.Application.Wpf;
 
 namespace ProcessManager
@@ -27,14 +25,15 @@ namespace ProcessManager
         
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
-            var splash = new InternalSplashScreen();
+            var splash = new SplashScreenWindow();
             splash.Show();
 
-            ServiceProvider = IOCReplacer.Create(sc => { });
+            ServiceProvider = IOCReplacer.Create(sc => { sc.AddSingleton(this); });
 
-            MainWindow = ServiceProvider.GetRequiredService<Views.MainWindow>();
-            MainWindow?.Show();
+            var window = ServiceProvider.GetRequiredService<Views.MainWindow>();
+            window?.Show();
             
+            splash.Init(ServiceProvider.GetRequiredService<IAppService>());
             splash.Hide();
         }
     }

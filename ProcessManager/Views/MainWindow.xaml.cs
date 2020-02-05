@@ -26,10 +26,5 @@ namespace ProcessManager.Views
         {
             InitializeComponent();
         }
-
-        private void MainWindow_OnClosed(object? sender, EventArgs e)
-        {
-            Application.Current.Shutdown();
-        }
     }
 }

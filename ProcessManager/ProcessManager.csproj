@@ -4,7 +4,15 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Resources\4178928_512_xlt_icon.ico</ApplicationIcon>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="4178928-32.png" />
+    <None Remove="Resources\4178928-512.png" />
+    <None Remove="Resources\4178928_512_xlt_icon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Catel.Fody" Version="4.3.0" />
@@ -12,13 +20,27 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Hardcodet.NotifyIcon.Wpf.NetCore" Version="1.0.10" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.4.0" />
-    <PackageReference Include="Syncfusion.Themes.VisualStudio2015.WPF" Version="17.4.0.46" />
+    <PackageReference Include="Syncfusion.Themes.Office2010Blue.WPF" Version="17.4.0.46" />
     <PackageReference Include="Syncfusion.Tools.WPF" Version="17.4.0.46" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Tauron.Application.Wpf\Tauron.Application.Wpf.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\4178928-512.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\4178928_512_xlt_icon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions\" />
   </ItemGroup>
 
 </Project>
