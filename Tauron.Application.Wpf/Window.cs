@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using Catel.MVVM;
+using Catel.Windows;
 using Tauron.Application.Wpf.Helper;
 
 namespace Tauron.Application.Wpf
@@ -11,7 +12,7 @@ namespace Tauron.Application.Wpf
         private readonly ControlLogic _controlLogic;
 
         protected Window(IViewModel viewModel)
-            : base(viewModel)
+            : base(viewModel, DataWindowMode.Custom)
         {
             _viewModel = viewModel;
             SizeToContent = SizeToContent.Manual;

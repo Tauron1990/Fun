@@ -9,7 +9,7 @@
         xmlns:skin="clr-namespace:Syncfusion.SfSkinManager;assembly=Syncfusion.SfSkinManager.WPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800" skin:SfSkinManager.VisualStyle="VisualStudio2015">
-    <Grid>
+    <sync:DockingManager>
         <Button VerticalAlignment="Center" HorizontalAlignment="Center">Hallo Welt</Button>
-    </Grid>
+    </sync:DockingManager>
 </tau:Window>

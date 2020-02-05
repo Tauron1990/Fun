@@ -15,7 +15,7 @@ namespace ProcessManager
     /// </summary>
     public partial class App : Application
     {
-        public const string SyncfusionKey = "MTc0Mjk2QDMxMzcyZTMzMmUzMElNUnVpcGhkMFhTMThkRzcvM2hSMENDc2c2YURtQS95bXhJSzVXaDduUEE9";
+        public const string SyncfusionKey = "MjA2MjcyQDMxMzcyZTM0MmUzMEtaZlplNTBLMWZrRGgyR0dDV3QrdDVIMHRiOGxNZ0QyOENINWs5cUoxY2c9";
 
         public static IServiceProvider ServiceProvider { get; private set; }
 
