@@ -1,7 +1,4 @@
-﻿using System;
-using EcsRx.ReactiveData;
-
-namespace ImageViewerV3
+﻿namespace ImageViewerV3
 {
     public sealed class SelecedImage
     {
