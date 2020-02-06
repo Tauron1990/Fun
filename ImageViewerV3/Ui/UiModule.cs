@@ -1,9 +1,10 @@
 ﻿using ImageViewerV3.Ui.Services;
 using Ninject.Modules;
+using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Ui
 {
-    public sealed class UiModule : NinjectModule
+    public sealed class UiModule : DIModule
     {
         public override void Load()
         {

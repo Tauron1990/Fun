@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Tauron.Application.Reactive
@@ -6,7 +7,7 @@ namespace Tauron.Application.Reactive
     [PublicAPI]
     public static class ReactiveExtensions
     {
-        public static IServiceCollection AddReactiveExtensions(this IServiceCollection serviceCollection)
+        public static IServiceCollection AddTauronReactive(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<IListManager, ListManager>();
             serviceCollection.AddSingleton<IEventSystem, EventSystem>();
@@ -23,6 +24,12 @@ namespace Tauron.Application.Reactive
             }
 
             return serviceCollection;
+        }
+
+        public static void InitSystems(this IServiceProvider serviceProvider)
+        {
+            foreach (var system in serviceProvider.GetServices<ISystem>()) 
+                system.Init();
         }
     }
 }

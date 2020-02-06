@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Reactive;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using EcsRx.MicroRx.Subjects;
 
 namespace ImageViewerV3.Core
 {

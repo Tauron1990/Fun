@@ -1,14 +1,15 @@
 ﻿using ImageViewerV3.Data.Impl;
-using Ninject.Modules;
+using Microsoft.Extensions.DependencyInjection;
+using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Data
 {
-    public sealed class DataModule : NinjectModule
+    public sealed class DataModule : DIModule
     {
         public override void Load()
         {
-            Bind<IDataSerializer>().To<DataSerializer>().InSingletonScope();
-            Bind<IImageIndexer>().To<ImageIndexer>().InSingletonScope();
+            this.AddSingleton<IDataSerializer, DataSerializer>();
+            this.AddSingleton<IImageIndexer, ImageIndexer>();
         }
     }
 }

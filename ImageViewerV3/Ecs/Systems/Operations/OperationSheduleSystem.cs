@@ -7,7 +7,7 @@ using EcsRx.Groups;
 using EcsRx.Groups.Observable;
 using EcsRx.Systems;
 using ImageViewerV3.Core;
-using ImageViewerV3.Ecs.Components.Operations;
+using ImageViewerV3.Ecs.Components;
 
 namespace ImageViewerV3.Ecs.Systems.Operations
 {

@@ -6,7 +6,7 @@ using EcsRx.Groups;
 using EcsRx.Extensions;
 using EcsRx.Plugins.ReactiveSystems.Systems;
 using ImageViewerV3.Data;
-using ImageViewerV3.Ecs.Components.Data;
+using ImageViewerV3.Ecs.Components;
 
 namespace ImageViewerV3.Ecs.Systems.Data
 {

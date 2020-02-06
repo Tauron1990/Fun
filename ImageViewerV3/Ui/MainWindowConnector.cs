@@ -17,8 +17,8 @@ namespace ImageViewerV3.Ui
         public FilesManager FilesManager { get; }
         public ImageManager ImageManager { get; }
 
-        public MainWindowConnector(IEntityCollectionManager entityCollectionManager, IEventSystem eventSystem,
-                                   OperationManager manager, FilesManager filesManager, ImageManager imageManager) : base(entityCollectionManager, eventSystem)
+        public MainWindowConnector(IEntityCollectionManager listManager, IEventSystem eventSystem,
+                                   OperationManager manager, FilesManager filesManager, ImageManager imageManager) : base(listManager, eventSystem)
         {
             DisposeThis(eventSystem.Receive<PrepareLoadEvent>().Subscribe(_ => FileListIndex = 0));
             DisposeThis(filesManager.StartFilter.Subscribe(_ => FileListIndex = 1));

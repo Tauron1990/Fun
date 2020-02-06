@@ -1,30 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reactive.Disposables;
-using EcsRx.Collections;
-using EcsRx.Groups;
-using ImageViewerV3.Ecs;
-using ImageViewerV3.Ecs.Components.Image;
+using DynamicData.Kernel;
+using ImageViewerV3.Ecs.Components;
+using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Data.Impl
 {
     public sealed class ImageIndexer : IImageIndexer, IDisposable
     {
-        private readonly CompositeDisposable _disposable = new CompositeDisposable();
-        private readonly List<int> _indexes = new List<int>();
+        private readonly ChangeSetToCache<ImageComponent, int> _cache;
 
-        public ImageIndexer(IEntityCollectionManager entityCollectionManager)
-        {
-            var group = entityCollectionManager.GetObservableGroup(new Group(typeof(ImageComponent)), Collections.Images);
+        public ImageIndexer(IListManager entityCollectionManager) 
+            => _cache = new ChangeSetToCache<ImageComponent, int>(ic => ic.Index, entityCollectionManager.GetList<ImageComponent>().Connect());
 
-            _disposable.Add(group.OnEntityRemoved.Subscribe(e => _indexes.Add(e.Id)));
-            _disposable.Add(group.OnEntityAdded.Subscribe(e => _indexes.Remove(e.Id)));
-        }
-
-        public int? GetEntity(int index) 
-            => _indexes[index];
+        public Optional<ImageComponent> GetEntity(int index) 
+            => _cache.Lookup(index);
 
         public void Dispose() 
-            => _disposable.Dispose();
+            => _cache.Dispose();
     }
 }

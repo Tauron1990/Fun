@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DynamicData;
 
@@ -65,8 +66,8 @@ namespace Tauron.Application.Reactive
                 if (_lists.TryGetValue(listKey, out var target))
                     return (ISourceList<TType>) target;
 
-                var list = new SourceList<TType>().Connect().Bind;
-
+                var list = new SourceList<TType>();
+                
                 if (_lists.TryAdd(listKey, list))
                 {
                     UpdateSourceLists(listKey, list);

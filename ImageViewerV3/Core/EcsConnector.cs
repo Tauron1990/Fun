@@ -4,12 +4,10 @@ using System.Reactive.Disposables;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using EcsRx.Collections;
-using EcsRx.Events;
-using EcsRx.Plugins.Computeds;
-using EcsRx.ReactiveData;
 using JetBrains.Annotations;
+using Reactive.Bindings;
 using Syncfusion.Windows.Shared;
+using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Core
 {
@@ -19,12 +17,12 @@ namespace ImageViewerV3.Core
         public event PropertyChangedEventHandler? PropertyChanged;
 
         private CompositeDisposable _compositeDisposable = new CompositeDisposable();
-        private readonly IEntityCollectionManager _entityCollectionManager;
+        private readonly IListManager _listManager;
         private readonly IEventSystem _eventSystem;
 
-        protected EcsConnector(IEntityCollectionManager entityCollectionManager, IEventSystem eventSystem)
+        protected EcsConnector(IListManager listManager, IEventSystem eventSystem)
         {
-            _entityCollectionManager = entityCollectionManager;
+            _listManager = listManager;
             _eventSystem = eventSystem;
         }
 
@@ -32,7 +30,7 @@ namespace ImageViewerV3.Core
         protected virtual void OnPropertyChanged([CallerMemberName] [CanBeNull] string? propertyName = null) 
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        protected ReactiveProperty<TData> Track<TData>(IComputed<TData> data, string name)
+        protected ReactiveProperty<TData> Track<TData>(IObservable<TData> data, string name)
         {
             var prop = new ReactiveProperty<TData>(data);
             return Track(prop, name);
@@ -44,10 +42,10 @@ namespace ImageViewerV3.Core
             return data;
         }
 
-        protected ICommand BindToEvent<TEvent>(Func<IEntityCollectionManager, TEvent?> exec, Func<IEntityCollectionManager, bool>? canExec = null)
+        protected ICommand BindToEvent<TEvent>(Func<IListManager, TEvent?> exec, Func<IListManager, bool>? canExec = null)
             where TEvent : class
         {
-            var manager = _entityCollectionManager;
+            var manager = _listManager;
 
             // ReSharper disable once ImplicitlyCapturedClosure
             async void Exec(object arg) =>

@@ -4,10 +4,11 @@ using ImageViewerV3.Ecs.Systems.Image;
 using ImageViewerV3.Ecs.Systems.Loading;
 using ImageViewerV3.Ecs.Systems.Operations;
 using Ninject.Modules;
+using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Ecs.Systems
 {
-    public sealed class SystemModule : NinjectModule
+    public sealed class SystemModule : DIModule
     {
         public override void Load()
         {

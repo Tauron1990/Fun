@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Threading.Tasks;
-using EcsRx.Components;
-using EcsRx.ReactiveData;
+using Reactive.Bindings;
 
-namespace ImageViewerV3.Ecs.Components.Operations
+namespace ImageViewerV3.Ecs.Components
 {
-    public sealed class OperationComponent : IComponent
+    public sealed class OperationComponent
     {
         private static int _opsIds;
 
         public string Message { get; }
 
-        public ReactiveProperty<bool> Sheduled { get; } = new ReactiveProperty<bool>(false);
+        public ReactiveProperty<bool> Sheduled { get; } = new ReactiveProperty<bool>();
+
+        public ReactiveProperty<bool> Running { get; } = new ReactiveProperty<bool>();
 
         public Func<object, Task> Task { get; }
         public object Data { get; }

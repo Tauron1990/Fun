@@ -1,7 +1,10 @@
-﻿namespace ImageViewerV3.Data
+﻿using DynamicData.Kernel;
+using ImageViewerV3.Ecs.Components;
+
+namespace ImageViewerV3.Data
 {
     public interface IImageIndexer
     {
-        int? GetEntity(int index);
+        Optional<ImageComponent> GetEntity(int index);
     }
 }

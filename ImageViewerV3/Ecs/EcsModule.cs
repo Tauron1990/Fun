@@ -1,13 +1,14 @@
 ﻿using ImageViewerV3.Ecs.Services;
-using Ninject.Modules;
+using Microsoft.Extensions.DependencyInjection;
+using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Ecs
 {
-    public sealed class EcsModule : NinjectModule
+    public sealed class EcsModule : DIModule
     {
         public override void Load()
         {
-            Bind<IFolderConfiguration>().To<FolderConfiguration>().InSingletonScope();
+            this.AddSingleton<IFolderConfiguration, FolderConfiguration>();
         }
     }
 }

@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using EcsRx.Collections;
-using EcsRx.Extensions;
-using ImageViewerV3.Ecs.Components.Data;
+using DynamicData;
+using ImageViewerV3.Ecs.Components;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -25,22 +23,22 @@ namespace ImageViewerV3.Data.Impl
 
                 Array.Add(
                     new JObject(
-                        new JProperty("Name", name),
+                        new JProperty("Category", name),
                         new JProperty("Value", value)));
             }
         }
 
         private const string TargetFileName = "_imageviewerdata.json";
 
-        private readonly IBlueprintDescriptor[] _blueprintDescriptors;
+        private readonly ISettingsDescriptor[] _blueprintDescriptors;
 
         private string _last = string.Empty;
-        private IEntityCollection? _lastCollection;
+        private ISourceList<DataComponent>? _lastCollection;
 
-        public DataSerializer(IBlueprintDescriptor[] blueprintDescriptors) 
+        public DataSerializer(ISettingsDescriptor[] blueprintDescriptors) 
             => _blueprintDescriptors = blueprintDescriptors;
 
-        public void LoadFrom(string path, IEntityCollection to)
+        public void LoadFrom(string path, ISourceList<DataComponent> to)
         {
             _lastCollection = to;
             _last = path;
@@ -50,20 +48,25 @@ namespace ImageViewerV3.Data.Impl
             if (!File.Exists(targetPath))
                 return;
 
-
             try
             {
-                var obj = JObject.Parse(File.ReadAllText(targetPath));
-                foreach (var property in obj.Properties())
+                JObject obj;
+
+                try
                 {
-                    var blue = _blueprintDescriptors.FirstOrDefault(bd => bd.Name == property.Name) 
-                               ?? _blueprintDescriptors.First(bd => bd.Name == "general");
-
-                    var jValue = (JArray) property.Value;
-                    var blueprint = blue.Create(jValue.First.Value<string>("Name"), jValue.First.Value<string>("Value"));
-
-                    to.CreateEntity(blueprint);
+                    obj = JObject.Parse(File.ReadAllText(targetPath));
                 }
+                catch
+                {
+                    obj = JObject.Parse(File.ReadAllText(targetPath + 1));
+                }
+
+                to.AddRange(from property in obj.Properties()
+                    let blue = _blueprintDescriptors.FirstOrDefault(bd => bd.Category == property.Name)
+                               ?? _blueprintDescriptors.First(bd => bd.Category == "general")
+                    let jValue = (JArray) property.Value
+                    from entry in jValue
+                    select blue.Create(entry.Value<string>("Category"), entry.Value<string>("Value")));
             }
             catch 
             {
@@ -85,11 +88,9 @@ namespace ImageViewerV3.Data.Impl
 
             var types = new Dictionary<string, GuardJObject>();
             
-            foreach (var ent in _lastCollection)
+            foreach (var ent in _lastCollection.Items)
             {
-                var type = "general";
-                if (ent.HasComponent<TypeComponent>())
-                    type = ent.GetComponent<TypeComponent>().Name ?? "general";
+                var type = ent.Category ?? "general";
 
                 if (!types.TryGetValue(type, out var array))
                 {
@@ -97,11 +98,13 @@ namespace ImageViewerV3.Data.Impl
                     types[type] = array;
                 }
 
-                var data = ent.GetComponent<DataComponent>();
-                array.AddSafe(data.Name, data.ReactiveValue.Value);
+                array.AddSafe(ent.Name, ent.ReactiveValue.Value);
             }
 
             var obj = new JObject(types.Select(kp => new JProperty(kp.Key, kp.Value.Array)));
+
+            if(File.Exists(path))
+                File.Copy(path, path + 1, true);
 
             File.WriteAllText(path, obj.ToString(Formatting.Indented));
         }

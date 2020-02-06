@@ -63,4 +63,8 @@
     <Folder Include="Vlc\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Tauron.Application.Reactive\Tauron.Application.Reactive.csproj" />
+  </ItemGroup>
+
 </Project>

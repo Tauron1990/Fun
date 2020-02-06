@@ -9,9 +9,7 @@ using EcsRx.Groups;
 using EcsRx.Groups.Observable;
 using EcsRx.Plugins.Computeds.Collections;
 using EcsRx.Systems;
-using ImageViewerV3.Ecs.Blueprints.Data;
-using ImageViewerV3.Ecs.Components.Data;
-using ImageViewerV3.Ecs.Components.Image;
+using ImageViewerV3.Ecs.Components;
 
 namespace ImageViewerV3.Ecs.Systems.Image
 {

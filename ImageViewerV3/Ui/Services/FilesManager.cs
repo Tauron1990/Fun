@@ -11,22 +11,22 @@ using EcsRx.Groups;
 using EcsRx.ReactiveData;
 using ImageViewerV3.Core;
 using ImageViewerV3.Ecs;
-using ImageViewerV3.Ecs.Components.Image;
+using ImageViewerV3.Ecs.Components;
 using ImageViewerV3.Ecs.Events;
 
 namespace ImageViewerV3.Ui.Services
 {
     public sealed class FilesManager : EcsConnector
     {
-        public FilesManager(IEntityCollectionManager entityCollectionManager, IEventSystem eventSystem)
-            : base(entityCollectionManager, eventSystem)
+        public FilesManager(IEntityCollectionManager listManager, IEventSystem eventSystem)
+            : base(listManager, eventSystem)
         {
             DisposeThis(eventSystem
                            .Receive<PrepareLoadEvent>()
                            .Subscribe(_ => Filter = string.Empty));
 
             var group = new Group(typeof(ImageComponent));
-            var imageSource = DisposeThis(new GroupToCache(entityCollectionManager, group, Collections.Images));
+            var imageSource = DisposeThis(new GroupToCache(listManager, group, Collections.Images));
 
             DisposeThis(imageSource
                            .Connect()

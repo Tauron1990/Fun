@@ -13,7 +13,7 @@ using EcsRx.Plugins.Computeds;
 using EcsRx.ReactiveData;
 using ImageViewerV3.Core;
 using ImageViewerV3.Ecs;
-using ImageViewerV3.Ecs.Components.Operations;
+using ImageViewerV3.Ecs.Components;
 
 namespace ImageViewerV3.Ui.Services
 {
@@ -55,11 +55,11 @@ namespace ImageViewerV3.Ui.Services
                 => observableGroup.Any(e => e.HasComponent<OperationComponent>());
         }
 
-        public OperationManager(IEntityCollectionManager entityCollectionManager, IEventSystem eventSystem)
-            : base(entityCollectionManager, eventSystem)
+        public OperationManager(IEntityCollectionManager listManager, IEventSystem eventSystem)
+            : base(listManager, eventSystem)
         {
             var group = new Group(typeof(OperationComponent));
-            var operationCache = DisposeThis(new GroupToCache(entityCollectionManager, @group, Collections.Gui));
+            var operationCache = DisposeThis(new GroupToCache(listManager, @group, Collections.Gui));
 
             DisposeThis(    
                 DisposeThis(operationCache)
@@ -71,8 +71,8 @@ namespace ImageViewerV3.Ui.Services
                     .Subscribe());
 
 
-            _isRunning = Track(new OperationStade(entityCollectionManager), nameof(IsRunning));
-            _message = Track(new OperationMsgStade(entityCollectionManager), nameof(Message));
+            _isRunning = Track(new OperationStade(listManager), nameof(IsRunning));
+            _message = Track(new OperationMsgStade(listManager), nameof(Message));
         }
 
         private readonly ReactiveProperty<bool> _isRunning;

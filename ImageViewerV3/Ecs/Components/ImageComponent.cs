@@ -1,9 +1,10 @@
 ﻿using System.IO;
-using EcsRx.Components;
+using Reactive.Bindings;
+using Tauron.Application.Reactive;
 
-namespace ImageViewerV3.Ecs.Components.Image
+namespace ImageViewerV3.Ecs.Components
 {
-    public sealed class ImageComponent : IComponent
+    public sealed class ImageComponent : IEntity
     {
         public string FilePath { get; } = string.Empty;
 
@@ -11,11 +12,8 @@ namespace ImageViewerV3.Ecs.Components.Image
 
         public int Index { get; }
 
-        public ImageComponent()
-        {
-            
-        }
-
+        public ReactiveProperty<bool> IsFavorite { get; } = new ReactiveProperty<bool>();
+        
         public ImageComponent(string filePath, int index)
         {
             FilePath = filePath;
