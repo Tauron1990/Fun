@@ -67,7 +67,7 @@ namespace ImageViewerV3.Ui.Services
                             _message.Value = oe.ToString();
                         }));
                     })
-                    .Subscribe());
+                    .Subscribe());sdg
         }
 
         private readonly ReactiveProperty<bool> _isRunning = new ReactiveProperty<bool>();
