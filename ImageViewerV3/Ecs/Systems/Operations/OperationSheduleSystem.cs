@@ -1,77 +1,46 @@
 ﻿using System;
 using System.Threading.Tasks;
-using EcsRx.Collections;
-using EcsRx.Entities;
-using EcsRx.Extensions;
-using EcsRx.Groups;
-using EcsRx.Groups.Observable;
-using EcsRx.Systems;
+using DynamicData;
 using ImageViewerV3.Core;
 using ImageViewerV3.Ecs.Components;
+using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Ecs.Systems.Operations
 {
-    public sealed class OperationSheduleSystem : IManualSystem, IDisposable
+    public sealed class OperationSheduleSystem : ISystem, IDisposable
     {
-        private class EntityObserver : IObserver<IEntity>
-        {
-            private readonly Action<IEntity> _next;
-            private readonly Action _rest;
-
-            public EntityObserver(Action<IEntity> next, Action rest)
-            {
-                _next = next;
-                _rest = rest;
-            }
-
-            public void OnCompleted() 
-                => _rest();
-
-            public void OnError(Exception error) 
-                => _rest();
-
-            public void OnNext(IEntity value) 
-                => _next(value);
-        }
-
-        private readonly MessageQueue<IEntity> _messageQueue = new MessageQueue<IEntity>(skipExceptions:false);
-
-        public IGroup Group { get; } = new Group(null, new []{ typeof(OperationComponent) }, new []{typeof(OperationRunningComponent)});
-
+        private readonly MessageQueue<OperationComponent> _messageQueue = new MessageQueue<OperationComponent>(skipExceptions:false);
+        
         private IDisposable? _subscription;
-        private readonly IEntityCollectionManager _manager;
+        private readonly ISourceList<OperationComponent> _operations = new SourceList<OperationComponent>();
 
-        public OperationSheduleSystem(IEntityCollectionManager manager)
+        public OperationSheduleSystem()
         {
-            _manager = manager;
             _messageQueue.OnWork += MessageQueueOnWork;
             Task.Run(async () => await _messageQueue.Start());
         }
 
-        private async Task MessageQueueOnWork(IEntity arg)
+        private async Task MessageQueueOnWork(OperationComponent arg)
         {
-            arg.AddComponent<OperationRunningComponent>();
-            var component = arg.GetComponent<OperationComponent>(); 
-            await component.Task(component.Data);
-            _manager.RemoveEntity(arg);
+            arg.Running.Value = true;
+            await arg.Task(arg.Data);
+            _operations.Remove(arg);
         }
-
-        public void StartSystem(IObservableGroup observableGroup) 
-            => _subscription = observableGroup.OnEntityAdded.Subscribe(new EntityObserver(Process, () => _subscription?.Dispose()));
-
-        private void Process(IEntity obj)
+        
+        private void Process(OperationComponent obj)
         {
-            obj.GetComponent<OperationComponent>().Sheduled.Value = true;
+            obj.Sheduled.Value = true;
             _messageQueue.Enqueue(obj);
         }
 
-        public void StopSystem(IObservableGroup observableGroup) 
-            => _subscription?.Dispose();
-
         public void Dispose()
         {
+            _subscription?.Dispose();
             _messageQueue.Stop();
             _messageQueue.Dispose();
         }
+
+        public void Init(IListManager listManager) 
+            => _subscription = listManager.GetList<OperationComponent>().Connect().OnItemAdded(Process).Subscribe();
     }
 }

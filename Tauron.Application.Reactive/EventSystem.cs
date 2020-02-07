@@ -9,6 +9,6 @@ namespace Tauron.Application.Reactive
             throw new NotImplementedException();
         }
 
-        public IObservable<TEvent> Subscribe<TEvent>() => throw new NotImplementedException();
+        public IObservable<TEvent> Receive<TEvent>() => throw new NotImplementedException();
     }
 }

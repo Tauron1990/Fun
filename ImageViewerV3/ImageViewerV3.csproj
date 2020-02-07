@@ -60,6 +60,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Ecs\Systems\Image\" />
     <Folder Include="Vlc\" />
   </ItemGroup>
 

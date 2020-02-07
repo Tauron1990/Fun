@@ -16,52 +16,54 @@ namespace Tauron.Application.Reactive
         {
             _cache = new SourceCache<TValue, TKey>(keySelector);
 
-            _subscription = set.Subscribe(cs =>
-            {
-                foreach (var change in cs)
-                {
-                    switch (change.Reason)
-                    {
-                        case ListChangeReason.Add:
-                            _cache.AddOrUpdate(change.Item.Current);
-                            break;
-                        case ListChangeReason.AddRange:
-                            _cache.AddOrUpdate(change.Range);
-                            break;
-                        case ListChangeReason.Replace:
-                            change.Item.Previous.IfHasValue(tv => _cache.Remove(tv));
-                            _cache.AddOrUpdate(change.Item.Current);
-                            break;
-                        case ListChangeReason.Remove:
-                            _cache.Remove(change.Item.Current);
-                            break;
-                        case ListChangeReason.RemoveRange:
-                            _cache.Remove(change.Range);
-                            break;
-                        case ListChangeReason.Refresh:
-                            switch (change.Type)
-                            {
-                                case ChangeType.Item:
-                                    _cache.Refresh(change.Item.Current);
-                                    break;
-                                case ChangeType.Range:
-                                    _cache.Refresh(change.Range);
-                                    break;
-                                default:
-                                    throw new ArgumentOutOfRangeException();
-                            }
+            _subscription = set.OnItemAdded(_cache.AddOrUpdate).OnItemRemoved(_cache.Remove).Subscribe();
 
-                            break;
-                        case ListChangeReason.Clear:
-                            _cache.Clear();
-                            break;
-                        case ListChangeReason.Moved:
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-                }
-            });
+            //_subscription = set.Receive(cs =>
+            //{
+            //    foreach (var change in cs)
+            //    {
+            //        switch (change.Reason)
+            //        {
+            //            case ListChangeReason.Add:
+            //                _cache.AddOrUpdate(change.Item.Current);
+            //                break;
+            //            case ListChangeReason.AddRange:
+            //                _cache.AddOrUpdate(change.Range);
+            //                break;
+            //            case ListChangeReason.Replace:
+            //                change.Item.Previous.IfHasValue(tv => _cache.Remove(tv));
+            //                _cache.AddOrUpdate(change.Item.Current);
+            //                break;
+            //            case ListChangeReason.Remove:
+            //                _cache.Remove(change.Item.Current);
+            //                break;
+            //            case ListChangeReason.RemoveRange:
+            //                _cache.Remove(change.Range);
+            //                break;
+            //            case ListChangeReason.Refresh:
+            //                switch (change.Type)
+            //                {
+            //                    case ChangeType.Item:
+            //                        _cache.Refresh(change.Item.Current);
+            //                        break;
+            //                    case ChangeType.Range:
+            //                        _cache.Refresh(change.Range);
+            //                        break;
+            //                    default:
+            //                        throw new ArgumentOutOfRangeException();
+            //                }
+
+            //                break;
+            //            case ListChangeReason.Clear:
+            //                _cache.Clear();
+            //                break;
+            //            case ListChangeReason.Moved:
+            //                break;
+            //            default:
+            //                throw new ArgumentOutOfRangeException();
+            //        }
+            //    }
+            //});
         }
 
         public IObservable<Change<TValue, TKey>> Watch(TKey key) 

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Reactive.Bindings;
+using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Ecs.Components
 {
-    public sealed class OperationComponent
+    public sealed class OperationComponent : IEntity
     {
         private static int _opsIds;
 
@@ -14,12 +15,12 @@ namespace ImageViewerV3.Ecs.Components
 
         public ReactiveProperty<bool> Running { get; } = new ReactiveProperty<bool>();
 
-        public Func<object, Task> Task { get; }
-        public object Data { get; }
+        public Func<object?, Task> Task { get; }
+        public object? Data { get; }
 
         public int OpsId { get; } = ++_opsIds;
 
-        public OperationComponent(string message, Func<object, Task> task, object data)
+        public OperationComponent(string message, Func<object?, Task> task, object data)
         {
             Message = message;
             Task = task;

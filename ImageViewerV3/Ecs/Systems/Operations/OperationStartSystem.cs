@@ -1,21 +1,19 @@
-﻿using EcsRx.Collections;
-using EcsRx.Events;
-using EcsRx.Plugins.ReactiveSystems.Custom;
-using ImageViewerV3.Ecs.Blueprints;
-using ImageViewerV3.Ecs.Blueprints.Operations;
+﻿using DynamicData;
+using ImageViewerV3.Ecs.Components;
 using ImageViewerV3.Ecs.Events;
+using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Ecs.Systems.Operations
 {
     public sealed class OperationStartSystem : EventReactionSystem<StartOperationEvent>
     {
-        private readonly IEntityCollection _entitys;
+        private readonly ISourceList<OperationComponent> _operations;
 
-        public OperationStartSystem(IEventSystem eventSystem, IEntityCollectionManager collectionManager) 
+        public OperationStartSystem(IEventSystem eventSystem, IListManager listManager) 
             : base(eventSystem) =>
-            _entitys = collectionManager.GetCollection(Collections.Gui);
+            _operations = listManager.GetList<OperationComponent>();
 
-        public override void EventTriggered(StartOperationEvent eventData) 
-            => _entitys.CreateEntity(new OperationBlueprint(eventData));
+        protected override void EventTriggered(StartOperationEvent eventData) 
+            => _operations.Add(new OperationComponent(eventData.Name, eventData.ToDo, eventData.Data));
     }
 }

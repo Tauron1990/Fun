@@ -3,17 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Windows.Controls;
-using DynamicData.Kernel;
-using EcsRx.Blueprints;
-using EcsRx.Collections;
-using EcsRx.Entities;
-using EcsRx.Events;
-using EcsRx.Extensions;
-using EcsRx.Groups;
-using EcsRx.Groups.Observable;
-using EcsRx.Plugins.Computeds;
-using EcsRx.ReactiveData;
+using DynamicData;
 using ImageViewerV3.Ecs.Components;
 using ImageViewerV3.Ecs.Events;
 using Reactive.Bindings;
@@ -25,43 +15,62 @@ namespace ImageViewerV3.Ecs.Services
     {
         private const string PagingType = "Paging";
 
-        private class IndexBlueprint
+        private class DualLink<TType> : IDisposable
         {
-            public const string IndexName = "Index";
+            private readonly IDisposable _toproperty;
+            private readonly IDisposable _toData;
 
-            public DataComponent Apply()
+            public DualLink(Func<string, (bool IsOk, TType Result)> converter, IReactiveProperty<TType> reactiveProperty, DataComponent data)
             {
-                return new DataComponent(IndexName, "0", PagingType);
+                _toData = reactiveProperty.Subscribe(n => data.ReactiveValue.Value = n.ToString());
+                _toproperty = data.ReactiveValue.Select(converter).Subscribe(res =>
+                {
+                    var (isOk, result) = res;
+                    if (isOk)
+                        reactiveProperty.Value = result;
+                });
+            }
 
-                entity.AddComponent(new TypeComponent(PagingType));
-                entity.AddComponent(new DataComponent(IndexName, "0"));
+            public void Dispose()
+            {
+                _toproperty.Dispose();
+                _toData.Dispose();
             }
         }
 
-        private static readonly Dictionary<string, Func<DataComponent>> Blueprints = new Dictionary<string, IBlueprint>
+        private interface IBlueprint
+        {
+            DataComponent Create();
+        }
+
+        private class IndexBlueprint : IBlueprint
+        {
+            public const string IndexName = "Index";
+
+            public DataComponent Create() 
+                => new DataComponent(IndexName, "0", PagingType);
+        }
+
+        private static readonly Dictionary<string, IBlueprint> Blueprints = new Dictionary<string, IBlueprint>
                                                                              {
                                                                                  { PagingType+IndexBlueprint.IndexName, new IndexBlueprint() }
                                                                              };
 
         private readonly CompositeDisposable _disposable = new CompositeDisposable();
-        private readonly IEntityCollection _dataCollection;
+        private readonly ISourceList<DataComponent> _dataCollection;
+        private readonly Func<DataComponent> _indexData;
 
-        public IComputed<Optional<SelecedImage>> SelectedImage { get; }
+        private CompositeDisposable? _loadDispose;
 
         public ReactiveProperty<int> CurrentIndex { get; } = new ReactiveProperty<int>(0);
 
 
-        public FolderConfiguration(IEntityCollectionManager entityCollectionManager, IEventSystem eventSystem)
+        public FolderConfiguration(IListManager listManager, IEventSystem eventSystem)
         {
             _disposable.Add(eventSystem.Receive<PostLoadingEvent>().Subscribe(CheckSettings));
 
-            SelectedImage = new SelecedImageProperty(entityCollectionManager);
-            _dataCollection = entityCollectionManager.GetCollection(Collections.Data);
-
-            var indexProp = new DataProperty(entityCollectionManager, PagingType, IndexBlueprint.IndexName);
-            _disposable.Add(
-                CurrentIndex.Subscribe(
-                    index => indexProp.Value.IfHasValue(c => c.ReactiveValue?.SetValueAndForceNotify(index.ToString()))));
+            _dataCollection = listManager.GetList<DataComponent>();
+            _indexData = () => _dataCollection.Items.First(dc => dc.Category == PagingType && dc.Name == IndexBlueprint.IndexName);
 
             _disposable.Add(CurrentIndex);
         }
@@ -70,20 +79,20 @@ namespace ImageViewerV3.Ecs.Services
 
         private void CheckSettings(PostLoadingEvent e)
         {
+            _loadDispose?.Dispose();
+
+
             var checkedList = new HashSet<string>();
 
-            foreach (var entity in _dataCollection)
+            foreach (var item in _dataCollection.Items)
             {
-                var types = entity.GetComponent<TypeComponent>();
-                var comp = entity.GetComponent<DataComponent>();
-
-                switch (types.Name)
+                switch (item.Category)
                 {
                     case PagingType:
-                        switch (comp.Name)
+                        switch (item.Name)
                         {
                             case IndexBlueprint.IndexName:
-                                if (int.TryParse(comp.ReactiveValue.Value, out var index))
+                                if (int.TryParse(item.ReactiveValue.Value, out var index))
                                 {
                                     CurrentIndex.Value = index;
                                     checkedList.Add(PagingType + IndexBlueprint.IndexName);
@@ -95,10 +104,25 @@ namespace ImageViewerV3.Ecs.Services
             }
 
             foreach (var blueprint in Blueprints.Where(blueprint => checkedList.Add(blueprint.Key))) 
-                _dataCollection.CreateEntity(blueprint.Value);
+                _dataCollection.Add(blueprint.Value.Create());
+
+            _loadDispose = new CompositeDisposable
+            {
+                Link(s =>
+                {
+                    var isOk = int.TryParse(s, out var result);
+                    return (isOk, result);
+                }, CurrentIndex, _indexData())
+            };
         }
 
-        public void Dispose() 
-            => _disposable.Dispose();
+        private static IDisposable Link<TType>(Func<string, (bool IsOk, TType Result)> converter, IReactiveProperty<TType> reactiveProperty, DataComponent data)
+            => new DualLink<TType>(converter, reactiveProperty, data);
+
+        public void Dispose()
+        {
+            _loadDispose?.Dispose();
+            _disposable.Dispose();
+        }
     }
 }

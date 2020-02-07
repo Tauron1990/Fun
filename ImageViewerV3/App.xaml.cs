@@ -15,7 +15,7 @@ namespace ImageViewerV3
     /// </summary>
     public partial class App
     {
-        private ServiceProvider? _serviceProvider;
+        public static ServiceProvider? ServiceProvider { get; private set; }
 
         public App() 
             => SyncfusionLicenseProvider.RegisterLicense("MjA2MjcyQDMxMzcyZTM0MmUzMEtaZlplNTBLMWZrRGgyR0dDV3QrdDVIMHRiOGxNZ0QyOENINWs5cUoxY2c9");
@@ -31,15 +31,15 @@ namespace ImageViewerV3
                 new BlueprintModule(),
                 new EcsModule());
 
-            _serviceProvider = coll.BuildServiceProvider();
-            _serviceProvider.InitSystems();
+            ServiceProvider = coll.BuildServiceProvider();
+            ServiceProvider.InitSystems();
 
             base.OnStartup(e);
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
-            _serviceProvider?.Dispose();
+            ServiceProvider?.Dispose();
             base.OnExit(e);
         }
     }

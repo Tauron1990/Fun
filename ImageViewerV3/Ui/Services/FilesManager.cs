@@ -1,60 +1,47 @@
 ﻿using System;
-using System.IO;
-using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
+using DynamicData.Alias;
 using DynamicData.Binding;
-using EcsRx.Collections;
-using EcsRx.Events;
-using EcsRx.Extensions;
-using EcsRx.Groups;
-using EcsRx.ReactiveData;
 using ImageViewerV3.Core;
-using ImageViewerV3.Ecs;
 using ImageViewerV3.Ecs.Components;
 using ImageViewerV3.Ecs.Events;
+using Reactive.Bindings;
+using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Ui.Services
 {
     public sealed class FilesManager : EcsConnector
     {
-        public FilesManager(IEntityCollectionManager listManager, IEventSystem eventSystem)
+        public FilesManager(IListManager listManager, IEventSystem eventSystem)
             : base(listManager, eventSystem)
         {
             DisposeThis(eventSystem
                            .Receive<PrepareLoadEvent>()
                            .Subscribe(_ => Filter = string.Empty));
 
-            var group = new Group(typeof(ImageComponent));
-            var imageSource = DisposeThis(new GroupToCache(listManager, group, Collections.Images));
+
+            var imageSource = listManager.GetList<ImageComponent>();
 
             DisposeThis(imageSource
                            .Connect()
-                           .Transform(e => e.GetComponent<ImageComponent>())
                            .ObserveOnDispatcher()
                            .Bind(Files)
                            .Subscribe());
             
             _filter = Track(new ReactiveProperty<string>(), nameof(Filter));
-            DisposeThis(_filter.Subscribe(s =>
-                                          {
-                                              if(!string.IsNullOrWhiteSpace(s))
-                                                StartFilter.Execute();
-                                          }));
 
             DisposeThis(imageSource
                            .Connect()
-                           .Transform(e => e.GetComponent<ImageComponent>())
-                           .Filter(Observable.Return(new Func<ImageComponent, bool>(FilterAction)), StartFilter)
+                           .Filter(FilterAction)
                            .ObserveOnDispatcher()
                            .Bind(Filtered)
                            .Subscribe());
 
             DisposeThis(imageSource
                            .Connect()
-                           .Filter(e => e.HasComponent<IsFavoriteComponent>())
-                           .Transform(e => e.GetComponent<ImageComponent>())
-                           .Filter(Observable.Return(new Func<ImageComponent, bool>(FilterAction)), StartFilter)
+                           .Where(c => c.IsFavorite.Value)
+                           .Filter(FilterAction)
                            .ObserveOnDispatcher()
                            .Bind(Favorites)
                            .Subscribe());
@@ -65,13 +52,14 @@ namespace ImageViewerV3.Ui.Services
         public IObservableCollection<ImageComponent> Filtered { get; } = new ObservableCollectionExtended<ImageComponent>();
 
         private readonly ReactiveProperty<string> _filter;
+
+        public IObservable<string> FilterObservable => _filter.AsObservable();
+
         public string Filter
         {
             get => _filter.Value;
-            set => _filter.SetValueAndForceNotify(value);
+            set => _filter.Value = value;
         }
-
-        public ObservableCommand StartFilter { get; } = new ObservableCommand();
 
         private bool FilterAction(ImageComponent component) => string.IsNullOrWhiteSpace(Filter) || component.Name.Contains(Filter);
 

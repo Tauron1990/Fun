@@ -1,29 +1,23 @@
 ﻿using System;
 using System.Reactive.Linq;
-using EcsRx.Attributes;
-using EcsRx.Entities;
-using EcsRx.Groups;
-using EcsRx.Extensions;
-using EcsRx.Plugins.ReactiveSystems.Systems;
 using ImageViewerV3.Data;
 using ImageViewerV3.Ecs.Components;
+using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Ecs.Systems.Data
 {
-    [CollectionAffinity(Collections.Data)]
-    public sealed class DataSaveSystem : IReactToEntitySystem
+    public sealed class DataSaveSystem : ReactToEntitySystem<DataComponent>
     {
-        public IGroup Group { get; } = new Group(typeof(DataComponent));
 
         private readonly IDataSerializer _dataSerializer;
 
         public DataSaveSystem(IDataSerializer dataSerializer) 
             => _dataSerializer = dataSerializer;
 
-        public IObservable<IEntity> ReactToEntity(IEntity entity) 
-            => entity.GetComponent<DataComponent>().ReactiveValue.DistinctUntilChanged().Select(v => entity);
+        protected override IObservable<DataComponent> ReactTo(DataComponent entity) 
+            => entity.ReactiveValue.DistinctUntilChanged().Select(s => entity);
 
-        public void Process(IEntity entity) 
+        protected override void Process(DataComponent entity) 
             => _dataSerializer.Save();
     }
 }

@@ -3,17 +3,33 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using EcsRx.Collections;
-using EcsRx.Events;
-using EcsRx.Plugins.ReactiveSystems.Custom;
+using DynamicData;
 using ImageViewerV3.Core;
-using ImageViewerV3.Ecs.Blueprints.Image;
+using ImageViewerV3.Ecs.Components;
 using ImageViewerV3.Ecs.Events;
+using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Ecs.Systems.Loading
 {
     public sealed class LoadImagesSystem : EventReactionSystem<LoadImagesEvent>
     {
+        private class IndexHelper
+        {
+            private int _index;
+
+            public int GetIndex()
+            {
+                try
+                {
+                    return _index;
+                }
+                finally
+                {
+                    _index++;
+                }
+            }
+        }
+
         private sealed class NaturalStringComparer : IComparer<string?>
         {
             public static readonly NaturalStringComparer Comparer = new NaturalStringComparer();
@@ -26,22 +42,23 @@ namespace ImageViewerV3.Ecs.Systems.Loading
             public int Compare(string? a, string? b) => CompareNumeric(a, b);
         }
 
-        private readonly IEntityCollection _collection;
+        private readonly ISourceList<ImageComponent> _collection;
         
-        public LoadImagesSystem(IEventSystem eventSystem, IEntityCollectionManager manager) : base(eventSystem) 
-            => _collection = manager.GetCollection(Collections.Images);
+        public LoadImagesSystem(IEventSystem eventSystem, IListManager manager) : base(eventSystem) 
+            => _collection = manager.GetList<ImageComponent>();
 
-        public override void EventTriggered(LoadImagesEvent eventData)
+        protected override void EventTriggered(LoadImagesEvent eventData)
         {
-            var index = 0;
+            var index = new IndexHelper();
 
-            foreach (var file in Directory.EnumerateFiles(eventData.Path)
-                                            .Where(p =>
-                                            {
-                                                var mime = MimeTypes.GetMimeType(Path.GetFileName(p));
-                                                return mime.StartsWith("image") || mime.StartsWith("video") || mime.StartsWith("audio");
-                                            }).OrderBy(Path.GetFileName, NaturalStringComparer.Comparer)) 
-                _collection.CreateEntity(new ImageBlueprint(file, index++));
+            _collection.AddRange(Directory.EnumerateFiles(eventData.Path)
+                .Where(p =>
+                {
+                    var mime = MimeTypes.GetMimeType(Path.GetFileName(p));
+                    return mime.StartsWith("image") || mime.StartsWith("video") || mime.StartsWith("audio");
+                })
+                .OrderBy(Path.GetFileName, NaturalStringComparer.Comparer)
+                .Select(s => new ImageComponent(s, index.GetIndex())));
         }
 
 

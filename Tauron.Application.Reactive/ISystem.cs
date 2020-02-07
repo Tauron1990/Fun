@@ -4,6 +4,6 @@ namespace Tauron.Application.Reactive
 {
     public interface ISystem
     {
-        void Init();
+        void Init(IListManager listManager);
     }
 }

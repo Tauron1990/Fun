@@ -28,8 +28,9 @@ namespace Tauron.Application.Reactive
 
         public static void InitSystems(this IServiceProvider serviceProvider)
         {
+            var man = serviceProvider.GetRequiredService<IListManager>();
             foreach (var system in serviceProvider.GetServices<ISystem>()) 
-                system.Init();
+                system.Init(man);
         }
     }
 }

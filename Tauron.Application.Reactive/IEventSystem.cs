@@ -8,6 +8,6 @@ namespace Tauron.Application.Reactive
     {
         void Publish<TEvent>(TEvent @event);
 
-        IObservable<TEvent> Subscribe<TEvent>();
+        IObservable<TEvent> Receive<TEvent>();
     }
 }

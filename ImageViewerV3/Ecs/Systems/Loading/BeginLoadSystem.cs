@@ -1,26 +1,25 @@
 ﻿using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using EcsRx.Collections;
-using EcsRx.Events;
-using EcsRx.Plugins.ReactiveSystems.Custom;
+using DynamicData;
+using ImageViewerV3.Ecs.Components;
 using ImageViewerV3.Ecs.Events;
+using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Ecs.Systems.Loading
 {
     public sealed class BeginLoadSystem : EventReactionSystem<BeginLoadingEvent>
     {
-        private readonly IEntityCollection _imageCollection;
-        private readonly IEntityCollection _dataCollection;
+        private readonly ISourceList<ImageComponent> _imageCollection;
+        private readonly ISourceList<DataComponent> _dataCollection;
 
-        public BeginLoadSystem(IEventSystem eventSystem, IEntityCollectionManager entityCollectionManager) : base(eventSystem)
+        public BeginLoadSystem(IEventSystem eventSystem, IListManager listManager) : base(eventSystem)
         {
-            _imageCollection = entityCollectionManager.GetCollection(Collections.Images);
-            _dataCollection = entityCollectionManager.GetCollection(Collections.Data);
+            _imageCollection = listManager.GetList<ImageComponent>();
+            _dataCollection = listManager.GetList<DataComponent>();
         }
 
-        public override void EventTriggered(BeginLoadingEvent eventData)
+        protected override void EventTriggered(BeginLoadingEvent eventData)
         {
             EventSystem.Publish(new StartOperationEvent("Bilder Laden", LoadImages, eventData));
         }
@@ -36,8 +35,8 @@ namespace ImageViewerV3.Ecs.Systems.Loading
                 return Task.CompletedTask;
             }
 
-            RemoveAllEntitys(_dataCollection);
-            RemoveAllEntitys(_imageCollection);
+            _dataCollection.Clear();
+            _imageCollection.Clear();
 
             EventSystem.Publish(new PrepareLoadEvent());
             EventSystem.Publish(new LoadDataEvent(eventData.Location));
@@ -45,12 +44,6 @@ namespace ImageViewerV3.Ecs.Systems.Loading
             EventSystem.Publish(new PostLoadingEvent());
 
             return Task.CompletedTask;
-        }
-
-        private static void RemoveAllEntitys(IEntityCollection collection)
-        {
-            foreach (var id in collection.Select(e => e.Id).ToArray()) 
-                collection.RemoveEntity(id);
         }
     }
 }

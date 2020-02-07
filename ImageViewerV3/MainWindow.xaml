@@ -47,12 +47,18 @@
                         <ListBox ItemsSource="{Binding FilesManager.Favorites}"/>
                     </TabItem>
                 </TabControl>
-                <StackPanel Grid.Row="2" Grid.Column="0">
-                    <TextBox Margin="5" Text="{Binding FilesManager.Filter, Delay=300, UpdateSourceTrigger=PropertyChanged}"/>
-                    <Button Margin="5" HorizontalAlignment="Right" Command="{Binding FilesManager.StartFilter}">
-                        <Image Source="Resources/if_icon-111-search_314478.png" Height="20" />
-                    </Button>
-                </StackPanel>
+                <Grid Grid.Row="2" Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Image Source="Resources/if_icon-111-search_314478.png" MaxHeight="25"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding FilesManager.Filter, Delay=300, UpdateSourceTrigger=PropertyChanged}"/>
+                </Grid>
                 <Button Grid.Row="2" Grid.Column="1" Margin="20">
                     <Image Source="Resources/if_go-first_118769.png" MaxHeight="100" />
                 </Button>
