@@ -8,41 +8,26 @@ using System.Reactive;
 using DynamicData;
 using DynamicData.Alias;
 using DynamicData.Binding;
+using Newtonsoft.Json;
 
 namespace TestApp
 {
     class Program
     {
-        private class TestImage
-        {
-            public string FilePath { get; }
-
-            public string FileName => Path.GetFileName(FilePath);
-
-            public TestImage(string filePath) => FilePath = filePath;
-        }
-
-        private class TestImage2
-        {
-            public string FilePath { get; }
-
-            public string FileName => Path.GetFileName(FilePath);
-
-            public TestImage2(string filePath) => FilePath = filePath;
-        }
-
         static void Main(string[] args)
         {
-            const string testPath = @"G:\Shankaku";
+            var setting = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto, Formatting = Formatting.Indented};
 
-            var cache = new SourceList<TestImage>();
-            IObservableCollection<TestImage2> img = new ObservableCollectionExtended<TestImage2>();
-            
-            cache.Connect().Filter(ti => ti.FileName.Contains('9')).Select(ti => new TestImage2(ti.FilePath)).Bind(img).Subscribe();
-            
-            cache.AddRange(Directory.EnumerateFiles(testPath).OrderBy(s => s, StringComparer.Ordinal).Select(s => new TestImage(s)));
+            var test = new List<Type>
+                       {
+                           typeof(string),
+                           typeof(int),
+                           typeof(bool)
+                       };
 
-            Console.Write(img.Count);
+            var testJson = JsonConvert.SerializeObject(test, setting);
+
+            test = JsonConvert.DeserializeObject<List<Type>>(testJson);
 
             Console.WriteLine("Fertig");
             Console.ReadKey();

@@ -35,8 +35,8 @@ namespace ImageViewerV3.Data.Impl
         private string _last = string.Empty;
         private ISourceList<DataComponent>? _lastCollection;
 
-        public DataSerializer(ISettingsDescriptor[] blueprintDescriptors) 
-            => _blueprintDescriptors = blueprintDescriptors;
+        public DataSerializer(IEnumerable<ISettingsDescriptor> blueprintDescriptors) 
+            => _blueprintDescriptors = blueprintDescriptors.ToArray();
 
         public void LoadFrom(string path, ISourceList<DataComponent> to)
         {

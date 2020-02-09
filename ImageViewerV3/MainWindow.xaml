@@ -7,9 +7,15 @@
         xmlns:skin="clr-namespace:Syncfusion.SfSkinManager;assembly=Syncfusion.SfSkinManager.WPF"
         xmlns:local="clr-namespace:ImageViewerV3.Ui"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
-        mc:Ignorable="d" skin:SfSkinManager.VisualStyle="Metro"
-        d:DataContext="{d:DesignInstance local:MainWindowConnector}" Icon="instagram.ico"
+        xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+        mc:Ignorable="d" skin:SfSkinManager.VisualStyle="Metro" Name="MainWindowName"
+        d:DataContext="{d:DesignInstance local:MainWindowConnector}" Icon="instagram.ico" Closed="MainWindow_OnClosed"
         Title="Image Viewer" Height="450" Width="800" WindowState="Maximized" Background="{DynamicResource BackgroundBrush}">
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Loaded" SourceObject="{Binding ElementName=MainWindowName}">
+            <b:CallMethodAction TargetObject="{Binding DataContext, ElementName=MainWindowName}" MethodName="OnLoadWindow"/>
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
     <DockPanel LastChildFill="True">
         <StatusBar DockPanel.Dock="Bottom">
             <TextBlock Text="Aktiv:" Margin="0,0,10,0"/>
@@ -37,14 +43,31 @@
                     </syncfusion:MenuItemAdv>
                 </syncfusion:MenuAdv>
                 <TabControl Grid.Row="1" Grid.Column="0" MinWidth="200" Margin="5" SelectedIndex="{Binding FileListIndex}">
-                    <TabItem Header="Daten">
-                        <ListBox ItemsSource="{Binding FilesManager.Files}"/>
+                    <TabItem Header="Tags">
+
                     </TabItem>
                     <TabItem Header="Suche">
-                        <ListBox ItemsSource="{Binding FilesManager.Filtered}"/>
+                        <ListBox ItemsSource="{Binding FilesManager.Filtered}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel IsVirtualizing="True" IsEnabled="True"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                        </ListBox>
                     </TabItem>
                     <TabItem Header="Favoriten">
-                        <ListBox ItemsSource="{Binding FilesManager.Favorites}"/>
+                        <ListBox ItemsSource="{Binding FilesManager.Favorites}">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                        </ListBox>
                     </TabItem>
                 </TabControl>
                 <Grid Grid.Row="2" Grid.Column="0">
@@ -59,10 +82,10 @@
                     <Image Source="Resources/if_icon-111-search_314478.png" MaxHeight="25"/>
                     <TextBox Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding FilesManager.Filter, Delay=300, UpdateSourceTrigger=PropertyChanged}"/>
                 </Grid>
-                <Button Grid.Row="2" Grid.Column="1" Margin="20">
+                <Button Grid.Row="2" Grid.Column="1" Margin="20" Command="{Binding BackImage}">
                     <Image Source="Resources/if_go-first_118769.png" MaxHeight="100" />
                 </Button>
-                <Button Grid.Row="2" Grid.Column="3" Margin="20">
+                <Button Grid.Row="2" Grid.Column="3" Margin="20" Command="{Binding NextImage}">
                     <Image Source="Resources/if_go-last_118772.png" Height="100" />
                 </Button>
                 <Button Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left"
@@ -74,10 +97,10 @@
                     <Image Source="Resources/if_view-fullscreen_118800.png" Height="50" />
                 </Button>
                 <Button Grid.Row="2" Grid.Column="2" VerticalContentAlignment="Center" HorizontalAlignment="Center"
-                        Margin="50, 45">
+                        Margin="50, 45" Command="{Binding DeleteCommand}">
                     <Image Source="Resources/if_f-cross_256_282471.png" Height="50" />
                 </Button>
-                <ContentControl Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Margin="10" />
+                <ContentControl Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Margin="10" Content="{Binding ImageManager.ImageContent}"/>
             </Grid>
         </syncfusion:SfBusyIndicator>
     </DockPanel>

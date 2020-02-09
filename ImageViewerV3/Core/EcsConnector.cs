@@ -30,11 +30,8 @@ namespace ImageViewerV3.Core
         protected virtual void OnPropertyChanged([CallerMemberName] [CanBeNull] string? propertyName = null) 
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        protected ReactiveProperty<TData> Track<TData>(IObservable<TData> data, string name)
-        {
-            var prop = new ReactiveProperty<TData>(data);
-            return Track(prop, name);
-        }
+        protected ReactiveProperty<TData> Track<TData>(IObservable<TData> data, string name) 
+            => Track(data.ToReactiveProperty(), name);
 
         protected ReactiveProperty<TData> Track<TData>(ReactiveProperty<TData> data, string name)
         {
@@ -59,13 +56,16 @@ namespace ImageViewerV3.Core
                 });
 
             // ReSharper disable once ImplicitlyCapturedClosure
-            bool CanExec(object arg)
-            {
-                return canExec == null || canExec(manager);
-            }
+            bool CanExec(object arg) => canExec == null || canExec(manager);
 
             return new DelegateCommand(Exec, CanExec);
         }
+
+        protected async void SendEvent<TEvent>(TEvent @event)
+            => await Task.Run(() => _eventSystem.Publish(@event));
+
+        protected void ReactOn<TEvent>(Action<TEvent> handler) 
+            => _compositeDisposable.Add(_eventSystem.Receive<TEvent>().Subscribe(handler));
 
         protected TType DisposeThis<TType>(TType toDispose)
             where TType : IDisposable

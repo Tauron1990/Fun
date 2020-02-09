@@ -1,4 +1,6 @@
-﻿using ImageViewerV3.Ui;
+﻿using System;
+using System.Windows;
+using ImageViewerV3.Ui;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ImageViewerV3
@@ -12,6 +14,11 @@ namespace ImageViewerV3
         {
             InitializeComponent();
             DataContext = App.ServiceProvider.GetRequiredService<MainWindowConnector>();
+        }
+
+        private void MainWindow_OnClosed(object? sender, EventArgs e)
+        {
+            Application.Current.Shutdown();
         }
     }
 }

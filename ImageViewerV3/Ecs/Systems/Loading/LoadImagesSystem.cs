@@ -51,14 +51,17 @@ namespace ImageViewerV3.Ecs.Systems.Loading
         {
             var index = new IndexHelper();
 
-            _collection.AddRange(Directory.EnumerateFiles(eventData.Path)
-                .Where(p =>
-                {
-                    var mime = MimeTypes.GetMimeType(Path.GetFileName(p));
-                    return mime.StartsWith("image") || mime.StartsWith("video") || mime.StartsWith("audio");
-                })
-                .OrderBy(Path.GetFileName, NaturalStringComparer.Comparer)
-                .Select(s => new ImageComponent(s, index.GetIndex())));
+            var list = Directory.EnumerateFiles(eventData.Path)
+               .Where(p =>
+                      {
+                          var mime = MimeTypes.GetMimeType(Path.GetFileName(p));
+                          return mime.StartsWith("image") || mime.StartsWith("video") || mime.StartsWith("audio");
+                      })
+               .OrderBy(Path.GetFileName, NaturalStringComparer.Comparer)
+               .Select(s => new ImageComponent(s, index.GetIndex()))
+               .ToArray();
+
+            _collection.AddRange(list);
         }
 
 

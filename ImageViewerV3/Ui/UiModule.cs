@@ -1,5 +1,5 @@
 ﻿using ImageViewerV3.Ui.Services;
-using Ninject.Modules;
+using Microsoft.Extensions.DependencyInjection;
 using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Ui
@@ -8,10 +8,10 @@ namespace ImageViewerV3.Ui
     {
         public override void Load()
         {
-            Bind<MainWindowConnector>().ToSelf();
-            Bind<OperationManager>().ToSelf();
-            Bind<FilesManager>().ToSelf();
-            Bind<ImageManager>().ToSelf();
+            this.AddTransient<MainWindowConnector>();
+            this.AddTransient<OperationManager>();
+            this.AddTransient<FilesManager>();
+            this.AddTransient<ImageManager>();
         }
     }
 }

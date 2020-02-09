@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Subjects;
 using Reactive.Bindings;
 
 namespace ImageViewerV3.Ui.Services
@@ -9,16 +11,13 @@ namespace ImageViewerV3.Ui.Services
         private string Name { get; }
 
         public int Id { get; }
-        public ReactiveProperty<bool> IsRunning { get; }
+        public Subject<Unit> Finish { get; } = new Subject<Unit>();
 
-        public ReactiveProperty<bool> IsSheduled { get; }
-
-        public OperationEntry(string name, int id, ReactiveProperty<bool> isRunning, ReactiveProperty<bool> isSheduled)
+        public OperationEntry(string name, int id)
         {
             Name = name;
             Id = id;
-            IsRunning = isRunning;
-            IsSheduled = isSheduled;
+            CompositeDisposable.Add(Finish);
         }
 
         public override string ToString() 
@@ -26,7 +25,10 @@ namespace ImageViewerV3.Ui.Services
 
         public CompositeDisposable CompositeDisposable { get; } = new CompositeDisposable();
 
-        public void Dispose() 
-            => CompositeDisposable.Dispose();
+        public void Dispose()
+        {
+            Finish.OnNext(Unit.Default);
+            CompositeDisposable.Dispose();
+        }
     }
 }

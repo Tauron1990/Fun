@@ -9,8 +9,5 @@ namespace Tauron.Application.Reactive
     {
         ISourceList<TType> GetList<TType>(int key = 0)
                 where TType : IEntity;
-
-
-        IObservable<IChangeSet<IEntity>> GetUnversalList();
     }
 }

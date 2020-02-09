@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using DynamicData;
@@ -19,12 +20,10 @@ namespace ImageViewerV3.Ecs.Systems.Loading
             _dataCollection = listManager.GetList<DataComponent>();
         }
 
-        protected override void EventTriggered(BeginLoadingEvent eventData)
-        {
-            EventSystem.Publish(new StartOperationEvent("Bilder Laden", LoadImages, eventData));
-        }
+        protected override void EventTriggered(BeginLoadingEvent eventData) 
+            => EventSystem.Publish(new StartOperationEvent("Bilder Laden", LoadImages, eventData));
 
-        private Task LoadImages(object data)
+        private Task LoadImages(object? data)
         {
             if(!(data is BeginLoadingEvent eventData))
                 return Task.CompletedTask;
@@ -35,13 +34,14 @@ namespace ImageViewerV3.Ecs.Systems.Loading
                 return Task.CompletedTask;
             }
 
+            EventSystem.Publish(new PrepareLoadEvent());
+
             _dataCollection.Clear();
             _imageCollection.Clear();
 
-            EventSystem.Publish(new PrepareLoadEvent());
             EventSystem.Publish(new LoadDataEvent(eventData.Location));
             EventSystem.Publish(new LoadImagesEvent(eventData.Location));
-            EventSystem.Publish(new PostLoadingEvent());
+            EventSystem.Publish(new PostLoadingEvent(eventData.Location));
 
             return Task.CompletedTask;
         }

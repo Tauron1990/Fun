@@ -14,6 +14,12 @@
     <PublishReadyToRun>true</PublishReadyToRun>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Ecs\Systems\Image\**" />
+    <EmbeddedResource Remove="Ecs\Systems\Image\**" />
+    <None Remove="Ecs\Systems\Image\**" />
+    <Page Remove="Ecs\Systems\Image\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="instagram.ico" />
@@ -30,9 +36,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DynamicData" Version="6.14.3" />
+    <PackageReference Include="DynamicData" Version="6.14.8" />
     <PackageReference Include="JetBrains.Annotations" Version="2019.1.3" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.1" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.19" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Ookii.Dialogs.Wpf.NETCore" Version="2.0.0" />
     <PackageReference Include="Syncfusion.SfBusyIndicator.WPF" Version="17.4.0.47" />
@@ -60,7 +67,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Ecs\Systems\Image\" />
     <Folder Include="Vlc\" />
   </ItemGroup>
 

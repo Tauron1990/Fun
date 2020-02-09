@@ -95,7 +95,7 @@ namespace ImageViewerV3.Core
                 _incomming.CompleteAdding();
             }
 
-            _stopEvent.WaitOne(100_000);
+            _stopEvent.WaitOne(2000);
         }
 
         public void Dispose()

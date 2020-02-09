@@ -9,6 +9,7 @@ namespace ImageViewerV3.Ecs
         public override void Load()
         {
             this.AddSingleton<IFolderConfiguration, FolderConfiguration>();
+            this.AddSingleton<IImageControlFactory, ImageControlFactory>();
         }
     }
 }

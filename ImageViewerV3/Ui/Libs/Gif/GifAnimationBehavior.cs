@@ -20,7 +20,7 @@ namespace ImageViewerV3.Ui.Libs.Gif
     /// Provides attached properties that display animated GIFs in a standard Image control.
     /// </summary>
     [PublicAPI]
-    public static class ImageBehavior
+    public static class GifAnimationBehavior
     {
         #region Public attached properties and events
 
@@ -52,7 +52,7 @@ namespace ImageViewerV3.Ui.Libs.Gif
             DependencyProperty.RegisterAttached(
               "AnimatedSource",
               typeof(ImageSource),
-              typeof(ImageBehavior),
+              typeof(GifAnimationBehavior),
               new UIPropertyMetadata(
                 null,
                 AnimatedSourceChanged));
@@ -85,7 +85,7 @@ namespace ImageViewerV3.Ui.Libs.Gif
             DependencyProperty.RegisterAttached(
               "RepeatBehavior",
               typeof(RepeatBehavior),
-              typeof(ImageBehavior),
+              typeof(GifAnimationBehavior),
               new UIPropertyMetadata(
                   default(RepeatBehavior),
                   RepeatBehaviorChanged));
@@ -117,7 +117,7 @@ namespace ImageViewerV3.Ui.Libs.Gif
             DependencyProperty.RegisterAttached(
                 "AnimateInDesignMode",
                 typeof(bool),
-                typeof(ImageBehavior),
+                typeof(GifAnimationBehavior),
                 new FrameworkPropertyMetadata(
                     false,
                     FrameworkPropertyMetadataOptions.Inherits,
@@ -149,7 +149,7 @@ namespace ImageViewerV3.Ui.Libs.Gif
         /// Identifies the <c>AutoStart</c> attached property.
         /// </summary>
         public static readonly DependencyProperty AutoStartProperty =
-            DependencyProperty.RegisterAttached("AutoStart", typeof(bool), typeof(ImageBehavior), new PropertyMetadata(true));
+            DependencyProperty.RegisterAttached("AutoStart", typeof(bool), typeof(GifAnimationBehavior), new PropertyMetadata(true));
 
         /// <summary>
         /// Gets the animation controller for the specified <c>Image</c> control.
@@ -167,7 +167,7 @@ namespace ImageViewerV3.Ui.Libs.Gif
         }
 
         private static readonly DependencyPropertyKey AnimationControllerPropertyKey =
-            DependencyProperty.RegisterAttachedReadOnly("AnimationController", typeof(ImageAnimationController), typeof(ImageBehavior), new PropertyMetadata(null));
+            DependencyProperty.RegisterAttachedReadOnly("AnimationController", typeof(ImageAnimationController), typeof(GifAnimationBehavior), new PropertyMetadata(null));
 
         /// <summary>
         /// Gets the value of the <c>IsAnimationLoaded</c> attached property for the specified object.
@@ -185,7 +185,7 @@ namespace ImageViewerV3.Ui.Libs.Gif
         }
 
         private static readonly DependencyPropertyKey IsAnimationLoadedPropertyKey =
-            DependencyProperty.RegisterAttachedReadOnly("IsAnimationLoaded", typeof(bool), typeof(ImageBehavior), new PropertyMetadata(false));
+            DependencyProperty.RegisterAttachedReadOnly("IsAnimationLoaded", typeof(bool), typeof(GifAnimationBehavior), new PropertyMetadata(false));
 
         /// <summary>
         /// Identifies the <c>IsAnimationLoaded</c> attached property.
@@ -201,7 +201,7 @@ namespace ImageViewerV3.Ui.Libs.Gif
                 "AnimationLoaded",
                 RoutingStrategy.Bubble,
                 typeof(RoutedEventHandler),
-                typeof(ImageBehavior));
+                typeof(GifAnimationBehavior));
 
         /// <summary>
         /// Adds a handler for the AnimationLoaded attached event.
@@ -239,7 +239,7 @@ namespace ImageViewerV3.Ui.Libs.Gif
                 "AnimationCompleted",
                 RoutingStrategy.Bubble,
                 typeof (RoutedEventHandler),
-                typeof (ImageBehavior));
+                typeof (GifAnimationBehavior));
 
         /// <summary>
         /// Adds a handler for the AnimationCompleted attached event.

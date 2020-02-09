@@ -10,6 +10,7 @@ namespace ImageViewerV3.Data
         {
             this.AddSingleton<IDataSerializer, DataSerializer>();
             this.AddSingleton<IImageIndexer, ImageIndexer>();
+            this.AddSingleton<IAppState, AppState>();
         }
     }
 }

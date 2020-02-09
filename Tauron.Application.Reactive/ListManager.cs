@@ -11,9 +11,9 @@ namespace Tauron.Application.Reactive
     {
         private sealed class ListKey : IEquatable<ListKey>
         {
-            public int Key { get; }
+            private int Key { get; }
 
-            public Type TargetType { get; }
+            private Type TargetType { get; }
 
             public ListKey(int key, Type targetType)
             {
@@ -21,22 +21,16 @@ namespace Tauron.Application.Reactive
                 TargetType = targetType;
             }
 
-            public override bool Equals(object obj) => base.Equals(obj);
-
             public bool Equals(ListKey other)
             {
                 if (ReferenceEquals(null, other)) return false;
                 if (ReferenceEquals(this, other)) return true;
-                return Key == other.Key && TargetType.Equals(other.TargetType);
+                return Key == other.Key && TargetType == other.TargetType;
             }
 
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    return (Key * 397) ^ TargetType.GetHashCode();
-                }
-            }
+            public override bool Equals(object obj) => ReferenceEquals(this, obj) || obj is ListKey other && Equals(other);
+
+            public override int GetHashCode() => HashCode.Combine(Key, TargetType);
 
             public static bool operator ==(ListKey left, ListKey right) => Equals(left, right);
 
@@ -47,13 +41,9 @@ namespace Tauron.Application.Reactive
 
         private readonly object _lock = new object();
         private readonly CompositeDisposable _compositeDisposable = new CompositeDisposable();
-        private readonly Subject<IChangeSet<IEntity>> _universalSubject = new Subject<IChangeSet<IEntity>>();
 
         private readonly ConcurrentDictionary<ListKey, object> _lists = new ConcurrentDictionary<ListKey, object>();
-
-        public ListManager() 
-            => _compositeDisposable.Add(_universalSubject);
-
+        
         public ISourceList<TType> GetList<TType>(int key = 0) 
             where TType : IEntity
         {
@@ -69,22 +59,13 @@ namespace Tauron.Application.Reactive
                 var list = new SourceList<TType>();
                 
                 if (_lists.TryAdd(listKey, list))
-                {
-                    UpdateSourceLists(listKey, list);
                     return list;
-                }
 
                 list.Dispose();
             }
         }
-
-        public IObservable<IChangeSet<IEntity>> GetUnversalList() 
-            => _universalSubject;
-
-
-        private void UpdateSourceLists<TType>(ListKey key, SourceList<TType> list) 
-            => _compositeDisposable.Add(list.Connect().Cast(t => (IEntity)t).Subscribe(_universalSubject));
-
+        
+        
         private void CheckDisposed()
         {
             if(_isDisposed)

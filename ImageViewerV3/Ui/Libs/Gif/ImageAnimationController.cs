@@ -43,7 +43,7 @@ namespace ImageViewerV3.Ui.Libs.Gif
         }
 
         private void AnimationCompleted(object? sender, EventArgs e) 
-            => _image.RaiseEvent(new System.Windows.RoutedEventArgs(ImageBehavior.AnimationCompletedEvent, _image));
+            => _image.RaiseEvent(new System.Windows.RoutedEventArgs(GifAnimationBehavior.AnimationCompletedEvent, _image));
 
         private void ImageSourceChanged(object? sender, EventArgs e) 
             => OnCurrentFrameChanged();
