@@ -12,5 +12,7 @@ namespace ImageViewerV3.Data
         void Remove(int index);
 
         bool IsDeleted(int index);
+
+        int Deleted { get; }
     }
 }

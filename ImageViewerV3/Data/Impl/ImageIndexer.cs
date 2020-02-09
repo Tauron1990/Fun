@@ -31,5 +31,7 @@ namespace ImageViewerV3.Data.Impl
 
         public bool IsDeleted(int index) 
             => _removed.Contains(index);
+
+        public int Deleted => _removed.Count;
     }
 }

@@ -8,9 +8,15 @@
         xmlns:local="clr-namespace:ImageViewerV3.Ui"
         xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
         xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:tau="clr-namespace:ImageViewerV3.Core.Converter"
         mc:Ignorable="d" skin:SfSkinManager.VisualStyle="Metro" Name="MainWindowName"
-        d:DataContext="{d:DesignInstance local:MainWindowConnector}" Icon="instagram.ico" Closed="MainWindow_OnClosed"
-        Title="Image Viewer" Height="450" Width="800" WindowState="Maximized" Background="{DynamicResource BackgroundBrush}">
+        d:DesignWidth="800" d:DesignHeight="450" d:DataContext="{d:DesignInstance local:MainWindowConnector}" Topmost="{Binding WindowState.TopMost}"
+        Icon="instagram.ico" Closed="MainWindow_OnClosed" WindowStyle="{Binding WindowState.WindowStyle}" KeyDown="MainWindow_OnKeyDown"
+        Title="Image Viewer" Height="{Binding WindowState.Height}" Width="{Binding WindowState.Width}" WindowState="{Binding WindowState.WindowState}" 
+        Background="{DynamicResource BackgroundBrush}">
+    <Window.Resources>
+
+    </Window.Resources>
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Loaded" SourceObject="{Binding ElementName=MainWindowName}">
             <b:CallMethodAction TargetObject="{Binding DataContext, ElementName=MainWindowName}" MethodName="OnLoadWindow"/>
@@ -37,12 +43,12 @@
                     <RowDefinition />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <syncfusion:MenuAdv Grid.ColumnSpan="4">
+                <syncfusion:MenuAdv Grid.ColumnSpan="4" Visibility="{Binding WindowState.ControlVisibility}">
                     <syncfusion:MenuItemAdv Header="Datei">
                         <syncfusion:MenuItemAdv Header="Öffnen" Command="{Binding OpenLocationCommand}"/>
                     </syncfusion:MenuItemAdv>
                 </syncfusion:MenuAdv>
-                <TabControl Grid.Row="1" Grid.Column="0" MinWidth="200" Margin="5" SelectedIndex="{Binding FileListIndex}">
+                <TabControl Grid.Row="1" Grid.Column="0" MinWidth="200" Margin="5" SelectedIndex="{Binding FileListIndex}" Visibility="{Binding WindowState.ControlVisibility}">
                     <TabItem Header="Tags">
 
                     </TabItem>
@@ -70,7 +76,7 @@
                         </ListBox>
                     </TabItem>
                 </TabControl>
-                <Grid Grid.Row="2" Grid.Column="0">
+                <Grid Grid.Row="2" Grid.Column="0" Visibility="{Binding WindowState.ControlVisibility}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition/>
@@ -82,21 +88,21 @@
                     <Image Source="Resources/if_icon-111-search_314478.png" MaxHeight="25"/>
                     <TextBox Grid.Row="0" Grid.Column="1" Margin="5" Text="{Binding FilesManager.Filter, Delay=300, UpdateSourceTrigger=PropertyChanged}"/>
                 </Grid>
-                <Button Grid.Row="2" Grid.Column="1" Margin="20" Command="{Binding BackImage}">
+                <Button Grid.Row="2" Grid.Column="1" Margin="20" Command="{Binding BackImage}" Visibility="{Binding WindowState.ControlVisibility}">
                     <Image Source="Resources/if_go-first_118769.png" MaxHeight="100" />
                 </Button>
-                <Button Grid.Row="2" Grid.Column="3" Margin="20" Command="{Binding NextImage}">
+                <Button Grid.Row="2" Grid.Column="3" Margin="20" Command="{Binding NextImage}" Visibility="{Binding WindowState.ControlVisibility}">
                     <Image Source="Resources/if_go-last_118772.png" Height="100" />
                 </Button>
-                <Button Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left"
+                <Button Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left" Visibility="{Binding WindowState.ControlVisibility}"
                         Margin="50, 10">
                     <Image Source="Resources/star.png" Height="50" />
                 </Button>
-                <Button Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right"
-                        Margin="50, 10">
+                <Button Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Visibility="{Binding WindowState.ControlVisibility}"
+                        Margin="50, 10" Command="{Binding FullScreen}">
                     <Image Source="Resources/if_view-fullscreen_118800.png" Height="50" />
                 </Button>
-                <Button Grid.Row="2" Grid.Column="2" VerticalContentAlignment="Center" HorizontalAlignment="Center"
+                <Button Grid.Row="2" Grid.Column="2" VerticalContentAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding WindowState.ControlVisibility}"
                         Margin="50, 45" Command="{Binding DeleteCommand}">
                     <Image Source="Resources/if_f-cross_256_282471.png" Height="50" />
                 </Button>

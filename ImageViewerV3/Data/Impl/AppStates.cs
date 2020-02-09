@@ -6,42 +6,49 @@ using Newtonsoft.Json;
 
 namespace ImageViewerV3.Data.Impl
 {
-    public sealed class AppState : IAppState
+    public sealed class AppStates : IAppStates
     {
         private const string Applocation = "Tauron\\ImnageViewerV3\\appstate.json";
         
+        private static readonly object _gate = new object();
         private static readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings{ TypeNameHandling = TypeNameHandling.Auto, Formatting = Formatting.Indented };
         private static readonly string FilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Applocation);
 
         private Dictionary<Type, object> _states = new Dictionary<Type, object>();
         
-        public AppState() 
+        public AppStates() 
             => LoadObject();
 
         public TType Get<TType>()
             where TType : new()
         {
-            var type = typeof(TType);
-            if (_states.TryGetValue(type, out var state))
-                return (TType) state;
+            lock (_gate)
+            {
+                var type = typeof(TType);
+                if (_states.TryGetValue(type, out var state))
+                    return (TType) state;
 
-            return new TType();
+                return new TType();
+            }
         }
 
         public void Set<TType>(Action<TType> updater)
             where TType : new()
         {
-            if (updater == null)
-                return;
+            lock (_gate)
+            {
+                if (updater == null)
+                    return;
 
-            var element = Get<TType>();
-            updater(element);
+                var element = Get<TType>();
+                updater(element);
 
-            if (element == null)
-                return;
+                if (element == null)
+                    return;
             
-            _states[typeof(TType)] = element;
-            SaveObject();
+                _states[typeof(TType)] = element;
+                SaveObject();
+            }
         }
 
         private void SaveObject()

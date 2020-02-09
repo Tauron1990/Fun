@@ -2,7 +2,7 @@
 
 namespace ImageViewerV3.Data
 {
-    public interface IAppState
+    public interface IAppStates
     {
         public TType Get<TType>()
             where TType : new();

@@ -26,14 +26,11 @@ namespace ImageViewerV3.Ui.Services
         private readonly Subject<Unit> _displayTrigger = new Subject<Unit>();
 
         private int _max;
-
-        private int _current; 35 //Indexer für gelöschte blider korrigieren;
-
         private bool _ready;
         
         public object ImageContent => _imageContent.Value;
 
-        public int CurrentIndex => _current;
+        public int CurrentIndex { get; private set; }
 
         public ImageManager(IListManager collectionManager, IEventSystem eventSystem, IFolderConfiguration folderConfiguration, IImageIndexer imageIndexer,
                             IImageControlFactory imageControlFactory)
@@ -48,7 +45,7 @@ namespace ImageViewerV3.Ui.Services
             ReactOn<NextPageEvnt>(NextImage);
 
             DisposeThis(_displayTrigger
-                           .Select(_ => _current)
+                           .Select(_ => CurrentIndex)
                            .Where(_ => _ready)
                            .Select(imageIndexer.GetEntity)
                            .Subscribe(NextImage));
@@ -65,7 +62,7 @@ namespace ImageViewerV3.Ui.Services
             if (img.HasValue)
             {
                 _imageControlFactory.Input.OnNext(img.Value);
-                _folderConfiguration.CurrentIndex.Value = img.Value.Index;
+                _folderConfiguration.CurrentIndex.Value = img.Value.Index - _imageIndexer.Deleted;
             }
             else
             {
@@ -75,7 +72,7 @@ namespace ImageViewerV3.Ui.Services
                     return;
                 }
 
-                _current = 0;
+                CurrentIndex = 0;
                 Task.Run(() => _displayTrigger.OnNext(Unit.Default));
             }
         }
@@ -83,7 +80,7 @@ namespace ImageViewerV3.Ui.Services
         private void InitNewLocation(PostLoadingEvent @event)
         {
             _ready = true;
-            _current = _folderConfiguration.CurrentIndex.Value;
+            CurrentIndex = _folderConfiguration.CurrentIndex.Value;
             _max = _imageIndexer.Last;
 
             _displayTrigger.OnNext(Unit.Default);
@@ -95,20 +92,20 @@ namespace ImageViewerV3.Ui.Services
             {
                 if (nextPage.GoBack)
                 {
-                    if (_current == 0)
-                        _current = _max;
+                    if (CurrentIndex == 0)
+                        CurrentIndex = _max;
                     else
-                        _current--;
+                        CurrentIndex--;
                 }
                 else
                 {
-                    if (_current == _max)
-                        _current = 0;
+                    if (CurrentIndex == _max)
+                        CurrentIndex = 0;
                     else
-                        _current++;
+                        CurrentIndex++;
                 }
 
-                if (_imageIndexer.IsDeleted(_current))
+                if (_imageIndexer.IsDeleted(CurrentIndex))
                     continue;
                 
                 _displayTrigger.OnNext(Unit.Default);

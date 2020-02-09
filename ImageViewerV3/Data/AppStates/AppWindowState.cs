@@ -10,10 +10,10 @@ namespace ImageViewerV3.Data.AppStates
 
         public WindowStyle WindowStyle { get; set; } = WindowStyle.SingleBorderWindow;
 
-        public WindowStartupLocation WindowStartupLocation { get; set; } = WindowStartupLocation.CenterScreen;
+        public bool TopMost { get; set; } = false;
 
-        public int Height { get; set; } = 450;
+        public double Height { get; set; } = 450;
 
-        public int Width { get; set; } = 800;
+        public double Width { get; set; } = 800;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Input;
 using ImageViewerV3.Ui;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,5 +21,8 @@ namespace ImageViewerV3
         {
             Application.Current.Shutdown();
         }
+
+        private void MainWindow_OnKeyDown(object sender, KeyEventArgs e) 
+            => ((MainWindowConnector)DataContext).OnKeyDowm(e);
     }
 }
