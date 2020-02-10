@@ -49,7 +49,11 @@ namespace ImageViewerV3.Ui
             OpenLocationCommand = BindToEvent(OpenLocation);
             NextImage = BindToEvent(_ => new NextPageEvnt(false));
             BackImage = BindToEvent(_ => new NextPageEvnt(true));
-            DeleteCommand = BindToEvent(_ => new DeleteEvent(ImageManager.CurrentIndex));
+            DeleteCommand = BindToEvent(
+                _ => MessageBox.Show("Wírklich Löschen?", "Löschen", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes
+                    ? new DeleteEvent(ImageManager.CurrentIndex)
+                    : null);
+            ToogleFavoriteCommand = BindToEvent(_ => new ToogleFavoritesEvent(ImageManager.CurrentIndex));
 
             FullScreen = new DelegateCommand(_ => _fullScreenManager.EnableFullScreen(), _ => true);
         }
@@ -104,6 +108,8 @@ namespace ImageViewerV3.Ui
         public ICommand BackImage { get; }
 
         public ICommand FullScreen { get; }
+
+        public ICommand ToogleFavoriteCommand { get; }
 
         public sealed class UIWindowState : INotifyPropertyChanged
         {

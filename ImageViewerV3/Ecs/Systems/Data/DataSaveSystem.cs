@@ -14,8 +14,11 @@ namespace ImageViewerV3.Ecs.Systems.Data
         public DataSaveSystem(IDataSerializer dataSerializer) 
             => _dataSerializer = dataSerializer;
 
-        protected override IObservable<DataComponent> ReactTo(DataComponent entity) 
-            => entity.ReactiveValue.DistinctUntilChanged().Select(s => entity);
+        protected override IObservable<DataComponent> ReactTo(DataComponent entity)
+        {
+            _dataSerializer.Save();
+            return entity.ReactiveValue.DistinctUntilChanged().Select(s => entity);
+        }
 
         protected override void Process(DataComponent entity) 
             => _dataSerializer.Save();

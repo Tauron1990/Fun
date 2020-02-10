@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DynamicData;
 using DynamicData.Kernel;
 using ImageViewerV3.Core;
 using ImageViewerV3.Ecs.Components;
@@ -26,8 +27,12 @@ namespace ImageViewerV3.Data.Impl
             => _cache.Lookup(index);
 
         public int Last => _cache.Items.Max(e => e.Index);
-        public void Remove(int index) 
-            => _removed.Add(index);
+        public void Remove(int index)
+        {
+            _cache.Lookup(index).IfHasValue(v => v.IsFavorite.Value = false);
+            _cache.RemoveKey(index);
+            _removed.Add(index);
+        }
 
         public bool IsDeleted(int index) 
             => _removed.Contains(index);

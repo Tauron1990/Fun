@@ -3,8 +3,10 @@ using System.IO;
 using System.Linq;
 using DynamicData;
 using ImageViewerV3.Ecs.Components;
+using ImageViewerV3.Ecs.Events;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Tauron.Application.Reactive;
 
 namespace ImageViewerV3.Data.Impl
 {
@@ -31,12 +33,16 @@ namespace ImageViewerV3.Data.Impl
         private const string TargetFileName = "_imageviewerdata.json";
 
         private readonly ISettingsDescriptor[] _blueprintDescriptors;
+        private readonly IEventSystem _eventSystem;
 
         private string _last = string.Empty;
         private ISourceList<DataComponent>? _lastCollection;
 
-        public DataSerializer(IEnumerable<ISettingsDescriptor> blueprintDescriptors) 
-            => _blueprintDescriptors = blueprintDescriptors.ToArray();
+        public DataSerializer(IEnumerable<ISettingsDescriptor> blueprintDescriptors, IEventSystem eventSystem)
+        {
+            _eventSystem = eventSystem;
+            _blueprintDescriptors = blueprintDescriptors.ToArray();
+        }
 
         public void LoadFrom(string path, ISourceList<DataComponent> to)
         {
@@ -68,16 +74,20 @@ namespace ImageViewerV3.Data.Impl
                     from entry in jValue
                     select blue.Create(entry.Value<string>("Category"), entry.Value<string>("Value")));
             }
-            catch 
+            catch
             {
                 try
                 {
                     File.Delete(targetPath);
                 }
-                catch(IOException)
+                catch (IOException)
                 {
-                    
+
                 }
+            }
+            finally
+            {
+                _eventSystem.Publish(new DataLoadedEvent());
             }
         }
 

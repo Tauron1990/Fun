@@ -15,7 +15,8 @@
         Title="Image Viewer" Height="{Binding WindowState.Height}" Width="{Binding WindowState.Width}" WindowState="{Binding WindowState.WindowState}" 
         Background="{DynamicResource BackgroundBrush}">
     <Window.Resources>
-
+        <BitmapImage x:Key="FavoriteImage" UriSource="Resources/star.png"/>
+        <BitmapImage x:Key="NoFavoriteImage" UriSource="Resources/star - empty.png"/>
     </Window.Resources>
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Loaded" SourceObject="{Binding ElementName=MainWindowName}">
@@ -95,8 +96,8 @@
                     <Image Source="Resources/if_go-last_118772.png" Height="100" />
                 </Button>
                 <Button Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left" Visibility="{Binding WindowState.ControlVisibility}"
-                        Margin="50, 10">
-                    <Image Source="Resources/star.png" Height="50" />
+                        Margin="50, 10" Command="{Binding ToogleFavoriteCommand}">
+                    <Image Source="{Binding ImageManager.CurrentImage.IsFavorite.Value, Converter={tau:BoolToImageConverter True={StaticResource FavoriteImage}, False={StaticResource NoFavoriteImage}}, FallbackValue={StaticResource NoFavoriteImage}}" Height="50" />
                 </Button>
                 <Button Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" Visibility="{Binding WindowState.ControlVisibility}"
                         Margin="50, 10" Command="{Binding FullScreen}">

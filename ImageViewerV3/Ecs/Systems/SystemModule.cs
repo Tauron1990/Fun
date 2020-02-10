@@ -16,6 +16,7 @@ namespace ImageViewerV3.Ecs.Systems
             this.AddSingleton<ISystem, LoadDataSystem>();
             this.AddSingleton<ISystem, DataSaveSystem>();
             this.AddSingleton<ISystem, LoadImagesSystem>();
+            this.AddSingleton<ISystem, FavoritesSystem>();
         }
     }
 }

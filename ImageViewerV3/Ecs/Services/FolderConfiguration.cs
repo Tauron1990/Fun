@@ -15,6 +15,8 @@ namespace ImageViewerV3.Ecs.Services
     {
         private const string PagingType = "Paging";
 
+        private const string FavoriteType = "Favorite";
+
         private class DualLink<TType> : IDisposable
         {
             private readonly IDisposable _toproperty;
@@ -22,7 +24,7 @@ namespace ImageViewerV3.Ecs.Services
 
             public DualLink(Func<string, (bool IsOk, TType Result)> converter, IReactiveProperty<TType> reactiveProperty, DataComponent data)
             {
-                _toData = reactiveProperty.Subscribe(n => data.ReactiveValue.Value = n.ToString());
+                _toData = reactiveProperty.Subscribe(n => data.ReactiveValue.Value = n?.ToString()!);
                 _toproperty = data.ReactiveValue.Select(converter).Subscribe(res =>
                 {
                     var (isOk, result) = res;
@@ -51,6 +53,8 @@ namespace ImageViewerV3.Ecs.Services
                 => new DataComponent(IndexName, "0", PagingType);
         }
 
+        private static readonly Random _idGen = new Random();
+
         private static readonly Dictionary<string, IBlueprint> Blueprints = new Dictionary<string, IBlueprint>
                                                                              {
                                                                                  { PagingType+IndexBlueprint.IndexName, new IndexBlueprint() }
@@ -63,6 +67,12 @@ namespace ImageViewerV3.Ecs.Services
         private CompositeDisposable? _loadDispose;
 
         public ReactiveProperty<int> CurrentIndex { get; } = new ReactiveProperty<int>(0);
+        public IReadOnlyCollection<string> Favorites { get; }
+
+        public void ToggleFavorite(string name)
+        {
+            gadsa 
+        }
 
 
         public FolderConfiguration(IListManager listManager, IEventSystem eventSystem)
@@ -73,6 +83,14 @@ namespace ImageViewerV3.Ecs.Services
             _indexData = () => _dataCollection.Items.First(dc => dc.Category == PagingType && dc.Name == IndexBlueprint.IndexName);
 
             _disposable.Add(CurrentIndex);
+            sfsd RemoveImage
+            _disposable.Add(
+                _dataCollection
+                        .Connect(dc => dc.Category == FavoriteType)
+                        .Transform(dc => dc.ReactiveValue.Value)
+                        .Bind(out var list).Subscribe());
+
+            Favorites = list;
         }
 
 

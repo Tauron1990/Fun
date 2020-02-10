@@ -27,8 +27,20 @@ namespace ImageViewerV3.Ui.Services
 
         private int _max;
         private bool _ready;
-        
+        private ImageComponent _currentImage;
+
         public object ImageContent => _imageContent.Value;
+
+        public ImageComponent? CurrentImage
+        {
+            get => _currentImage;
+            set
+            {
+                if (Equals(value, _currentImage)) return;
+                _currentImage = value;
+                OnPropertyChanged();
+            }
+        }
 
         public int CurrentIndex { get; private set; }
 
@@ -63,6 +75,7 @@ namespace ImageViewerV3.Ui.Services
             {
                 _imageControlFactory.Input.OnNext(img.Value);
                 _folderConfiguration.CurrentIndex.Value = img.Value.Index - _imageIndexer.Deleted;
+                CurrentImage = img.Value;
             }
             else
             {
