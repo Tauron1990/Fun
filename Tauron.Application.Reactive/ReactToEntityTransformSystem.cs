@@ -34,13 +34,13 @@ namespace Tauron.Application.Reactive
             _lisSubscription = list.Connect().OnItemAdded(OnAdd).OnItemRemoved(OnRemove).Subscribe();
         }
 
-        private void OnRemove(TType obj)
+        protected virtual void OnRemove(TType obj)
         {
             if (_subscriptions.Remove(obj, out var sub))
                 sub.Dispose();
         }
 
-        private void OnAdd(TType obj)
+        protected virtual void OnAdd(TType obj)
         {
             var subscription = ReactTo(obj).Subscribe(Process);
             _subscriptions[obj] = subscription;

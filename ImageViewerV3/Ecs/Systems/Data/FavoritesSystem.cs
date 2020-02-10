@@ -40,7 +40,7 @@ namespace ImageViewerV3.Ecs.Systems.Data
         {
             var (favorite, imageComponent) = entity;
             imageComponent.IsFavorite.Value = favorite;
-            _folderConfiguration.ToggleFavorite(imageComponent.Name);
+            _folderConfiguration.ToggleFavorite(imageComponent.Name, favorite);
         }
 
         public override void Dispose()

@@ -14,10 +14,19 @@ namespace ImageViewerV3.Ecs.Systems.Data
         public DataSaveSystem(IDataSerializer dataSerializer) 
             => _dataSerializer = dataSerializer;
 
-        protected override IObservable<DataComponent> ReactTo(DataComponent entity)
+        protected override IObservable<DataComponent> ReactTo(DataComponent entity) 
+            => entity.ReactiveValue.DistinctUntilChanged().Select(s => entity);
+
+        protected override void OnAdd(DataComponent obj)
         {
             _dataSerializer.Save();
-            return entity.ReactiveValue.DistinctUntilChanged().Select(s => entity);
+            base.OnAdd(obj);
+        }
+
+        protected override void OnRemove(DataComponent obj)
+        {
+            _dataSerializer.Save();
+            base.OnRemove(obj);
         }
 
         protected override void Process(DataComponent entity) 

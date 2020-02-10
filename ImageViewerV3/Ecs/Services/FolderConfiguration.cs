@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using DynamicData;
+using ImageViewerV3.Data;
 using ImageViewerV3.Ecs.Components;
 using ImageViewerV3.Ecs.Events;
 using Reactive.Bindings;
@@ -69,13 +70,18 @@ namespace ImageViewerV3.Ecs.Services
         public ReactiveProperty<int> CurrentIndex { get; } = new ReactiveProperty<int>(0);
         public IReadOnlyCollection<string> Favorites { get; }
 
-        public void ToggleFavorite(string name)
+        public void ToggleFavorite(string name, bool value)
         {
-            gadsa 
+            var dc = _dataCollection.Items.FirstOrDefault(dc => dc.Name == name);
+
+            if (dc == null && value)
+                _dataCollection.Add(new DataComponent(name, value.ToString(), FavoriteType));
+            else
+                dc.ReactiveValue.Value = value.ToString();
         }
 
 
-        public FolderConfiguration(IListManager listManager, IEventSystem eventSystem)
+        public FolderConfiguration(IListManager listManager, IEventSystem eventSystem, IImageIndexer indexer)
         {
             _disposable.Add(eventSystem.Receive<PostLoadingEvent>().Subscribe(CheckSettings));
 
@@ -83,12 +89,23 @@ namespace ImageViewerV3.Ecs.Services
             _indexData = () => _dataCollection.Items.First(dc => dc.Category == PagingType && dc.Name == IndexBlueprint.IndexName);
 
             _disposable.Add(CurrentIndex);
-            sfsd RemoveImage
+            
+            _disposable.Add(
+                eventSystem
+                   .Receive<DeleteEvent>()
+                   .Select(e => indexer.GetEntity(e.Index))
+                   .Where(o => o.HasValue)
+                   .Select(o => o.Value)
+                   .Select(ic => _dataCollection.Items.FirstOrDefault(dc => dc.Name == ic.Name))
+                   .Where(dc => dc != null)
+                   .Subscribe(dc => _dataCollection.Remove(dc)));
+
             _disposable.Add(
                 _dataCollection
-                        .Connect(dc => dc.Category == FavoriteType)
-                        .Transform(dc => dc.ReactiveValue.Value)
-                        .Bind(out var list).Subscribe());
+                   .Connect(dc => dc.Category == FavoriteType)
+                   .Filter(dc => bool.TryParse(dc.ReactiveValue.Value, out var result) && result)
+                   .Transform(dc => dc.Name)
+                   .Bind(out var list).Subscribe());
 
             Favorites = list;
         }

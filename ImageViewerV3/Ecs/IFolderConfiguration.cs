@@ -10,6 +10,6 @@ namespace ImageViewerV3.Ecs
 
         IReadOnlyCollection<string> Favorites { get; }
 
-        void ToggleFavorite(string name);
+        void ToggleFavorite(string name, bool value);
     }
 }
