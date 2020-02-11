@@ -54,8 +54,6 @@ namespace ImageViewerV3.Ecs.Services
                 => new DataComponent(IndexName, "0", PagingType);
         }
 
-        private static readonly Random _idGen = new Random();
-
         private static readonly Dictionary<string, IBlueprint> Blueprints = new Dictionary<string, IBlueprint>
                                                                              {
                                                                                  { PagingType+IndexBlueprint.IndexName, new IndexBlueprint() }
@@ -74,8 +72,11 @@ namespace ImageViewerV3.Ecs.Services
         {
             var dc = _dataCollection.Items.FirstOrDefault(dc => dc.Name == name);
 
-            if (dc == null && value)
-                _dataCollection.Add(new DataComponent(name, value.ToString(), FavoriteType));
+            if (dc == null)
+            {
+                if(value)
+                    _dataCollection.Add(new DataComponent(name, true.ToString(), FavoriteType));
+            }
             else
                 dc.ReactiveValue.Value = value.ToString();
         }
