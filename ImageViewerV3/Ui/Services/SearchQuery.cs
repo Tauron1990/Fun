@@ -22,25 +22,27 @@ namespace ImageViewerV3.Ui.Services
 
         public string Term { get; private set; } = string.Empty;
 
-        public bool Favorite { get; private set; }
+        private bool IsInvalid { get; set; }
 
-        public string SearchName { get; set; }
+        private bool Favorite { get; set; }
 
-        public List<string> ExcludedTags { get; } = new List<string>();
+        private string? SearchName { get; set; }
 
-        public List<string> Tags { get; } = new List<string>();
+        private List<string> ExcludedTags { get; } = new List<string>();
 
-        public ExpressionValue<int> Rating { get; private set; }
+        private List<string> Tags { get; } = new List<string>();
 
-        public ExpressionValue<string> User { get; private set; }
+        private ExpressionValue<int> Rating { get; set; }
 
-        public ExpressionValue<int> Height { get; private set; }
+        private ExpressionValue<string> User { get; set; }
 
-        public ExpressionValue<int> Width { get; private set; }
+        private ExpressionValue<int> Height { get; set; }
 
-        public ExpressionValue<int> Mpixels { get; private set; }
+        private ExpressionValue<int> Width { get; set; }
 
-        public ExpressionValue<DateTime> Date { get; set; }
+        private ExpressionValue<int> Mpixels { get; set; }
+
+        private ExpressionValue<DateTime> Date { get; set; }
 
         public static SearchQuery ParseTerm(string term)
         {
@@ -48,23 +50,21 @@ namespace ImageViewerV3.Ui.Services
             {
                 var output = Parser.ParseQuery(new Input(term.Trim() + " "));
 
-                if (output.WasSuccessful)
-                {
-                    output.Value.Term = term;
-                    return output.Value;
-                }
+                if (!output.WasSuccessful) return new SearchQuery { Term = term, IsInvalid = true };
+                
+                output.Value.Term = term;
+                return output.Value;
 
-                return Empty;
             }
             catch
             {
-                return Empty;
+                return new SearchQuery { Term = term, IsInvalid = true };
             }
         }
 
         public bool FilterAction(ImageComponent component)
         {
-            if (string.IsNullOrWhiteSpace(Term))
+            if (string.IsNullOrWhiteSpace(Term) || IsInvalid)
                 return false;
 
             if (Favorite)
@@ -73,23 +73,61 @@ namespace ImageViewerV3.Ui.Services
                     return false;
             }
 
-            bool result = true;
-
             if (ExcludedTags.Count != 0)
             {
-                result = ExcludedTags.Any(t => component.MetaData.Tags.Contains(t));
-                if (result)
+                if (ExcludedTags.Any(t => component.MetaData.Tags.Contains(t)))
                     return false;
             }
 
             if (Tags.Count != 0)
             {
-                result = Tags.Any(t => component.MetaData.Tags.Contains(t));
-                if (!result)
+                if (!Tags.Any(t => component.MetaData.Tags.Contains(t)))
                     return false;
             }
 
-            return true;
+            if (!string.IsNullOrWhiteSpace(SearchName))
+            {
+                if (!component.Name.Contains(SearchName))
+                    return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(User.Value))
+            {
+                if (!component.MetaData.User.Contains(User.Value))
+                    return false;
+            }
+
+            if (CompareInt(component.MetaData.Rating, Rating) && CompareInt(component.MetaData.Height, Height) &&
+                CompareInt(component.MetaData.Width, Width) && CompareInt(component.MetaData.Mpixels, Mpixels))
+            {
+                return Date.Expression switch
+                {
+                    Expression.None => true,
+                    Expression.Larger => (component.MetaData.CreationTime > Date.Value),
+                    Expression.Smaller => (component.MetaData.CreationTime < Date.Value),
+                    Expression.Equal => (component.MetaData.CreationTime == Date.Value),
+                    Expression.Between => (component.MetaData.CreationTime >= Date.Value && component.MetaData.CreationTime <= Date.Next),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+            }
+
+            return false;
+        }
+
+        private bool CompareInt(int meta, ExpressionValue<int> target)
+        {
+            var first = target.Value;
+            var next = target.Value;
+
+            return target.Expression switch
+            {
+                Expression.None => true,
+                Expression.Larger => first > meta,
+                Expression.Smaller => first < meta,
+                Expression.Equal => first == meta,
+                Expression.Between => meta >= first && meta <= next,
+                _ => throw new ArgumentOutOfRangeException(nameof(target.Expression), target.Expression, "No Valid Expressen Value.")
+            };
         }
 
         public struct ExpressionValue<TValue>
@@ -174,17 +212,18 @@ namespace ImageViewerV3.Ui.Services
                     .Select(r => new CommandEntry(r.Command, r.First, r.Next, r.Expression));
 
             private static readonly Parser<(bool exclude, string tag)> TagParse =
-                Parse.Char('-').Until(Parse.Char(' ')).Text()
-                    .Or(Parse.AnyChar.Until(Parse.Char(' ')).Text())
-                    .Where(s => !string.IsNullOrWhiteSpace(s))
-                    .Select(s => (s.StartsWith('-'), s));
+                Parse.WhiteSpace.Many().Then(_ =>
+                    Parse.Char('-').Until(Parse.Char(' ')).Text()
+                        .Or(Parse.AnyChar.Until(Parse.Char(' ')).Text())
+                        .Where(s => !string.IsNullOrWhiteSpace(s))
+                        .Select(s => (s.StartsWith('-'), s)));
 
             private static readonly Parser<string> FileNameParse =
-                from leading in Parse.WhiteSpace.Many()
+                TrimInput(
                 from first in Parse.Char('<')
                 from rest in Parse.CharExcept('>').Many().Text()
                 from end in Parse.Char('>')
-                select rest;
+                select rest);
             //Parse.Char('<').Until(Parse.Char('>')).Text();
 
             private static Parser<string> TrimInput(Parser<IEnumerable<char>> input)
@@ -265,6 +304,8 @@ namespace ImageViewerV3.Ui.Services
                     case "favorite":
                         query.Favorite = bool.Parse(entry.First);
                         break;
+                    default:
+                        throw new InvalidOperationException("Unkowen Command");
                 }
             }
 

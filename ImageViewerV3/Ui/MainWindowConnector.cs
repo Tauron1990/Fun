@@ -31,6 +31,11 @@ namespace ImageViewerV3.Ui
         public ImageManager ImageManager { get; }
         public UIWindowState WindowState { get; }
 
+        //TODO Search Query Help
+        //TODO Tags Parsing
+        //TODO Search and Favorites Paging
+        //TODO Search and Favorites Selection
+
         public MainWindowConnector(IListManager listManager, IEventSystem eventSystem, IAppStates appStatem,
                                    OperationManager manager, FilesManager filesManager, ImageManager imageManager) : base(listManager, eventSystem)
         {
