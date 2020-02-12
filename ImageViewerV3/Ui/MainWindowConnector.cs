@@ -33,8 +33,9 @@ namespace ImageViewerV3.Ui
 
         //TODO Search Query Help
         //TODO Tags Parsing
-        //TODO Search and Favorites Paging
         //TODO Search and Favorites Selection
+        //TODO Search and Favorites Paging
+        //TODO Search and Paging Saving (Separate and auromate)
 
         public MainWindowConnector(IListManager listManager, IEventSystem eventSystem, IAppStates appStatem,
                                    OperationManager manager, FilesManager filesManager, ImageManager imageManager) : base(listManager, eventSystem)
