@@ -84,5 +84,8 @@ namespace ImageViewerV3.Ui.Services
         private bool FilterAction(ImageComponent component) => string.IsNullOrWhiteSpace(Filter) || component.Name.Contains(Filter);
 
         public IObservableCollection<ImageComponent> Favorites { get; } = new ObservableCollectionExtended<ImageComponent>();
+
+        public void ForceUpdate()
+            => _filter.ForceNotify();
     }
 }

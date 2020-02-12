@@ -39,7 +39,7 @@ namespace ImageViewerV3.Core
             return data;
         }
 
-        protected ICommand BindToEvent<TEvent>(Func<IListManager, TEvent?> exec, Func<IListManager, bool>? canExec = null)
+        protected ICommand BindToEvent<TEvent>(Func<IListManager, TEvent?> exec, Func<IListManager, bool>? canExec = null, Action? postExec = null)
             where TEvent : class
         {
             var manager = _listManager;
@@ -53,6 +53,8 @@ namespace ImageViewerV3.Core
                         return;
 
                     _eventSystem.Publish(e);
+
+                    postExec?.Invoke();
                 });
 
             // ReSharper disable once ImplicitlyCapturedClosure

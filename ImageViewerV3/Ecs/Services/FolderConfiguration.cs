@@ -74,8 +74,11 @@ namespace ImageViewerV3.Ecs.Services
         {
             var dc = _dataCollection.Items.FirstOrDefault(dc => dc.Name == name);
 
-            if (dc == null && value)
-                _dataCollection.Add(new DataComponent(name, value.ToString(), FavoriteType));
+            if (dc == null)
+            {
+                if (value)
+                    _dataCollection.Add(new DataComponent(name, value.ToString(), FavoriteType));
+            }
             else
                 dc.ReactiveValue.Value = value.ToString();
         }
