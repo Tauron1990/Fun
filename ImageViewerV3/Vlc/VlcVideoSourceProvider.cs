@@ -37,62 +37,52 @@ namespace Vlc.DotNet.Wpf
         /// <summary>
         /// The memory mapped file handle that contains the picture data
         /// </summary>
-        private IntPtr memoryMappedFile;
+        private IntPtr _memoryMappedFile;
 
         /// <summary>
         /// The pointer to the buffer that contains the picture data
         /// </summary>
-        private IntPtr memoryMappedView;
+        private IntPtr _memoryMappedView;
 #endif
-        private bool isAlphaChannelEnabled;
-        private bool playerCreated;
+        private bool _isAlphaChannelEnabled;
+        private bool _playerCreated;
 
-        private ImageSource videoSource;
+        private ImageSource? _videoSource;
 
-        private Dispatcher dispatcher;
+        private readonly Dispatcher _dispatcher;
 
-        public VlcVideoSourceProvider(Dispatcher dispatcher)
-        {
-            this.dispatcher = dispatcher;
-        }
+        public VlcVideoSourceProvider(Dispatcher dispatcher) 
+            => _dispatcher = dispatcher;
 
         /// <summary>
         /// The Image source that represents the video.
         /// </summary>
-        public ImageSource VideoSource
+        public ImageSource? VideoSource
         {
-            get
-            {
-                return this.videoSource;
-            }
-
+            get => _videoSource;
             private set
             {
-                if (!Object.ReferenceEquals(this.videoSource, value))
-                {
-                    this.videoSource = value;
-                    this.OnPropertyChanged(nameof(VideoSource));
-                }
+                if (object.ReferenceEquals(this._videoSource, value)) return;
+                _videoSource = value;
+                OnPropertyChanged(nameof(VideoSource));
             }
         }
 
         /// <summary>
         /// The media player instance. You must call <see cref="CreatePlayer"/> before using this.
         /// </summary>
-        public VlcMediaPlayer MediaPlayer { get; private set; }
+        public VlcMediaPlayer? MediaPlayer { get; private set; }
 
         /// <summary>
         /// Defines if <see cref="VideoSource"/> pixel format is <see cref="PixelFormats.Bgr32"/> or <see cref="PixelFormats.Bgra32"/>
         /// </summary>
-        public bool IsAlphaChannelEnabled { get
-            {
-                return this.isAlphaChannelEnabled;
-            }
-
+        public bool IsAlphaChannelEnabled 
+        { 
+            get => _isAlphaChannelEnabled;
             set
             {
-                if (!playerCreated)
-                    this.isAlphaChannelEnabled = value;
+                if (!_playerCreated)
+                    _isAlphaChannelEnabled = value;
                 else
                     throw new InvalidOperationException("IsAlphaChannelEnabled property should be changed only before CreatePlayer method is called.");
             }
@@ -107,12 +97,12 @@ namespace Vlc.DotNet.Wpf
         {
             var directoryInfo = vlcLibDirectory ?? throw new ArgumentNullException(nameof(vlcLibDirectory));
 
-            this.MediaPlayer = new VlcMediaPlayer(directoryInfo, vlcMediaPlayerOptions);
+            MediaPlayer = new VlcMediaPlayer(directoryInfo, vlcMediaPlayerOptions);
 
-            this.MediaPlayer.SetVideoFormatCallbacks(this.VideoFormat, this.CleanupVideo);
-            this.MediaPlayer.SetVideoCallbacks(LockVideo, null, DisplayVideo, IntPtr.Zero);
+            MediaPlayer.SetVideoFormatCallbacks(this.VideoFormat, this.CleanupVideo);
+            MediaPlayer.SetVideoCallbacks(LockVideo, null, DisplayVideo, IntPtr.Zero);
 
-            playerCreated = true;
+            _playerCreated = true;
         }
 
         /// <summary>
@@ -121,7 +111,7 @@ namespace Vlc.DotNet.Wpf
         /// <param name="dimension">The dimension to be aligned</param>
         /// <param name="mod">The modulus</param>
         /// <returns>The aligned dimension</returns>
-        private uint GetAlignedDimension(uint dimension, uint mod)
+        private static uint GetAlignedDimension(uint dimension, uint mod)
         {
             var modResult = dimension % mod;
             if (modResult == 0)
@@ -145,11 +135,13 @@ namespace Vlc.DotNet.Wpf
         /// <returns>The number of buffers allocated</returns>
         private uint VideoFormat(out IntPtr userdata, IntPtr chroma, ref uint width, ref uint height, ref uint pitches, ref uint lines)
         {
+            if (pitches <= 0) throw new ArgumentOutOfRangeException(nameof(pitches));
+
             var pixelFormat = IsAlphaChannelEnabled ? PixelFormats.Bgra32 : PixelFormats.Bgr32;
             FourCCConverter.ToFourCC("RV32", chroma);
             
             //Correct video width and height according to TrackInfo
-            var md = MediaPlayer.GetMedia();
+            var md = MediaPlayer!.GetMedia();
             foreach (MediaTrack track in md.Tracks)
             {
                 if (track.Type == MediaTrackTypes.Video)
@@ -169,17 +161,17 @@ namespace Vlc.DotNet.Wpf
                 }
             }
 
-            pitches = this.GetAlignedDimension((uint)(width * pixelFormat.BitsPerPixel) / 8, 32);
-            lines = this.GetAlignedDimension(height, 32);
+            pitches = GetAlignedDimension((uint)(width * pixelFormat.BitsPerPixel) / 8, 32);
+            lines = GetAlignedDimension(height, 32);
 
             var size = pitches * lines;
 #if NET45
             this.memoryMappedFile = MemoryMappedFile.CreateNew(null, size);
             var handle = this.memoryMappedFile.SafeMemoryMappedFileHandle.DangerousGetHandle();
 #else
-            this.memoryMappedFile = Win32Interop.CreateFileMapping(new IntPtr(-1), IntPtr.Zero,
-                Win32Interop.PageAccess.ReadWrite, 0, (int)size, null);
-            var handle = this.memoryMappedFile;
+            _memoryMappedFile = Win32Interop.CreateFileMapping(new IntPtr(-1), IntPtr.Zero,
+                Win32Interop.PageAccess.ReadWrite, 0, (int)size, string.Empty);
+            var handle = this._memoryMappedFile;
 #endif
             var args = new
             {
@@ -189,7 +181,7 @@ namespace Vlc.DotNet.Wpf
                 pitches = pitches
             };
 
-            this.dispatcher.Invoke((Action)(() =>
+            this._dispatcher.Invoke((Action)(() =>
             {
                 this.VideoSource = (InteropBitmap)Imaging.CreateBitmapSourceFromMemorySection(handle,
                     (int)args.width, (int)args.height, args.pixelFormat, (int)args.pitches, 0);
@@ -199,8 +191,8 @@ namespace Vlc.DotNet.Wpf
             this.memoryMappedView = this.memoryMappedFile.CreateViewAccessor();
             var viewHandle = this.memoryMappedView.SafeMemoryMappedViewHandle.DangerousGetHandle();
 #else
-            this.memoryMappedView = Win32Interop.MapViewOfFile(this.memoryMappedFile, Win32Interop.FileMapAccess.AllAccess, 0, 0, size);
-            var viewHandle = this.memoryMappedView;
+            this._memoryMappedView = Win32Interop.MapViewOfFile(_memoryMappedFile, Win32Interop.FileMapAccess.AllAccess, 0, 0, size);
+            var viewHandle = _memoryMappedView;
 #endif
             userdata = viewHandle;
             return 1;
@@ -215,7 +207,7 @@ namespace Vlc.DotNet.Wpf
             // This callback may be called by Dispose in the Dispatcher thread, in which case it deadlocks if we call RemoveVideo again in the same thread.
             if (!disposedValue)
             {
-                this.dispatcher.Invoke((Action)this.RemoveVideo);
+                this._dispatcher.Invoke((Action)this.RemoveVideo);
             }
         }
 
@@ -239,7 +231,7 @@ namespace Vlc.DotNet.Wpf
         private void DisplayVideo(IntPtr userdata, IntPtr picture)
         {
             // Invalidates the bitmap
-            this.dispatcher.BeginInvoke((Action)(() =>
+            this._dispatcher.BeginInvoke((Action)(() =>
             {
                 (this.VideoSource as InteropBitmap)?.Invalidate();
             }));
@@ -253,20 +245,18 @@ namespace Vlc.DotNet.Wpf
         {
             this.VideoSource = null;
 
-#if NET45
+            #if NET45
             this.memoryMappedView?.Dispose();
             this.memoryMappedView = null;
             this.memoryMappedFile?.Dispose();
             this.memoryMappedFile = null;
-#else
-            if (this.memoryMappedFile != IntPtr.Zero)
-            {
-                Win32Interop.UnmapViewOfFile(this.memoryMappedView);
-                this.memoryMappedView = IntPtr.Zero;
-                Win32Interop.CloseHandle(this.memoryMappedFile);
-                this.memoryMappedFile = IntPtr.Zero;
-            }
-#endif
+            #else
+            if (_memoryMappedFile == IntPtr.Zero) return;
+            Win32Interop.UnmapViewOfFile(this._memoryMappedView);
+            _memoryMappedView = IntPtr.Zero;
+            Win32Interop.CloseHandle(this._memoryMappedFile);
+            _memoryMappedFile = IntPtr.Zero;
+            #endif
         }
 
         #region IDisposable Support
@@ -283,7 +273,7 @@ namespace Vlc.DotNet.Wpf
                 disposedValue = true;
                 this.MediaPlayer?.Dispose();
                 this.MediaPlayer = null;
-                this.dispatcher.BeginInvoke((Action)this.RemoveVideo);
+                this._dispatcher.BeginInvoke((Action)this.RemoveVideo);
             }
         }
 
@@ -303,11 +293,9 @@ namespace Vlc.DotNet.Wpf
         }
         #endregion
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        protected virtual void OnPropertyChanged(string propertyName) 
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

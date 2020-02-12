@@ -14,7 +14,9 @@ namespace ImageViewerV3.Ecs.Components
         public int Index { get; }
 
         public ReactiveProperty<bool> IsFavorite { get; } = new ReactiveProperty<bool>();
-        
+
+        public string[] Tags { get; } = Array.Empty<string>();
+
         public ImageComponent(string filePath, int index)
         {
             FilePath = filePath;
@@ -22,7 +24,8 @@ namespace ImageViewerV3.Ecs.Components
             Name = Path.GetFileName(filePath);
         }
 
-        public override string ToString() => Name;
+        public override string ToString() 
+            => $"{Index} - {Name}";
 
         public bool Equals(ImageComponent? other)
         {

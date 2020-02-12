@@ -8,7 +8,7 @@ namespace ImageViewerV3.Ui.Libs.Gif.Decoding
     {
         public GifHeader? Header { get; private set; }
         public GifColor[]? GlobalColorTable { get; set; }
-        public IList<GifFrame>? Frames { get; private set; }
+        public IList<GifFrame> Frames { get; private set; } = new List<GifFrame>();
         public IList<GifExtension>? Extensions { get; set; }
         public ushort RepeatCount { get; private set; }
 

@@ -20,9 +20,9 @@ namespace ImageViewerV3.Ui.Libs.Gif.Decoding
         public int CellHeight { get; private set; }
         public int ForegroundColorIndex { get; private set; }
         public int BackgroundColorIndex { get; private set; }
-        public string Text { get; private set; }
+        public string Text { get; private set; } = string.Empty;
 
-        public IList<GifExtension> Extensions { get; private set; }
+        public IList<GifExtension> Extensions { get; private set; } = new List<GifExtension>();
 
         private GifPlainTextExtension()
         {
@@ -58,7 +58,8 @@ namespace ImageViewerV3.Ui.Libs.Gif.Decoding
             BackgroundColorIndex = bytes[12];
 
             var dataBytes = GifHelpers.ReadDataBlocks(stream, metadataOnly);
-            Text = Encoding.ASCII.GetString(dataBytes);
+            if(dataBytes != null)
+                Text = Encoding.ASCII.GetString(dataBytes);
             Extensions = controlExtensions.ToList().AsReadOnly();
         }
     }

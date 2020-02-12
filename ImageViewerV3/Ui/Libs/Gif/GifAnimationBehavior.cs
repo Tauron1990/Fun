@@ -724,12 +724,13 @@ namespace ImageViewerV3.Ui.Libs.Gif
         private static FrameMetadata GetFrameMetadata(GifFrame gifMetadata)
         {
             var d = gifMetadata.Descriptor;
+            
             var frameMetadata = new FrameMetadata
                                 {
-                                    Left = d.Left,
-                                    Top = d.Top,
-                                    Width = d.Width,
-                                    Height = d.Height,
+                                    Left = d?.Left ?? 0,
+                                    Top = d?.Top ?? 0,
+                                    Width = d?.Width ?? 0,
+                                    Height = d?.Height ?? 0,
                                     Delay = TimeSpan.FromMilliseconds(100),
                                     DisposalMethod = FrameDisposalMethod.None
                                 };
@@ -746,8 +747,8 @@ namespace ImageViewerV3.Ui.Libs.Gif
         {
             if (gifMetadata != null)
             {
-                var lsd = gifMetadata.Header.LogicalScreenDescriptor;
-                return new Int32Size(lsd.Width, lsd.Height);
+                var lsd = gifMetadata.Header?.LogicalScreenDescriptor;
+                return new Int32Size(lsd?.Width ?? 0, lsd?.Height ?? 0);
             }
             var width = decoder.Metadata.GetQueryOrDefault("/logscrdesc/Width", 0);
             var height = decoder.Metadata.GetQueryOrDefault("/logscrdesc/Height", 0);

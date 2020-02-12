@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
 using System.Windows;
@@ -18,13 +17,9 @@ namespace ImageViewerV3.Ui.Services
 {
     public sealed class FilesManager : EcsConnector
     {
-        public IImageIndexer ImageIndexer { get; }
-
-
         public FilesManager(IListManager listManager, IEventSystem eventSystem, IImageIndexer imageIndexer)
             : base(listManager, eventSystem)
         {
-            ImageIndexer = imageIndexer;
             ReactOn<PrepareLoadEvent>(_ => Filter = string.Empty);
             ReactOn<DeleteEvent>(c =>
                                  {
@@ -46,9 +41,9 @@ namespace ImageViewerV3.Ui.Services
 
             var imageSource = listManager.GetList<ImageComponent>();
 
-            _filter = Track(new ReactiveProperty<string>(), nameof(Filter));
+            _filter = Track(new ReactiveProperty<SearchQuery>(), nameof(Filter));
 
-            var filter = Observable.Return(new Func<ImageComponent, bool>(FilterAction)).RepeatWhen(_ => _filter);
+            var filter = _filter.Select(sq => new Func<ImageComponent, bool>(sq.FilterAction));
 
             DisposeThis(imageSource
                            .Connect()
@@ -59,8 +54,8 @@ namespace ImageViewerV3.Ui.Services
 
             DisposeThis(imageSource
                            .Connect()
+                           .AutoRefreshOnObservable(ic => ic.IsFavorite)
                            .Where(c => c.IsFavorite.Value)
-                           .Filter(filter)
                            .ObserveOnDispatcher()
                            .Bind(Favorites)
                            .Subscribe());
@@ -70,22 +65,16 @@ namespace ImageViewerV3.Ui.Services
 
         public IObservableCollection<ImageComponent> Filtered { get; } = new ObservableCollectionExtended<ImageComponent>();
 
-        private readonly ReactiveProperty<string> _filter;
+        private readonly ReactiveProperty<SearchQuery> _filter;
 
-        public IObservable<string> FilterObservable => _filter.AsObservable();
+        public IObservable<string> FilterObservable => _filter.Select(sc => sc.Term);
 
         public string Filter
         {
-            get => _filter.Value;
-            set => _filter.Value = value;
+            get => _filter.Value?.Term ?? string.Empty;
+            set => _filter.Value = SearchQuery.ParseTerm(value);
         }
 
-        [DebuggerStepThrough]
-        private bool FilterAction(ImageComponent component) => string.IsNullOrWhiteSpace(Filter) || component.Name.Contains(Filter);
-
         public IObservableCollection<ImageComponent> Favorites { get; } = new ObservableCollectionExtended<ImageComponent>();
-
-        public void ForceUpdate()
-            => _filter.ForceNotify();
     }
 }

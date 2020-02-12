@@ -8,6 +8,7 @@ using System.Reactive;
 using DynamicData;
 using DynamicData.Alias;
 using DynamicData.Binding;
+using ImageViewerV3.Ui.Services;
 using Newtonsoft.Json;
 
 namespace TestApp
@@ -16,18 +17,7 @@ namespace TestApp
     {
         static void Main(string[] args)
         {
-            var setting = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Auto, Formatting = Formatting.Indented};
-
-            var test = new List<Type>
-                       {
-                           typeof(string),
-                           typeof(int),
-                           typeof(bool)
-                       };
-
-            var testJson = JsonConvert.SerializeObject(test, setting);
-
-            test = JsonConvert.DeserializeObject<List<Type>>(testJson);
+            var testQuery = SearchQuery.ParseTerm("favorite:true date:b30.01.2017;20.01.2020; rating:>=3 -test test2 test_3");
 
             Console.WriteLine("Fertig");
             Console.ReadKey();

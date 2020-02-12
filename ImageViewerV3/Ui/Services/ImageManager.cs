@@ -27,7 +27,7 @@ namespace ImageViewerV3.Ui.Services
 
         private int _max;
         private bool _ready;
-        private ImageComponent _currentImage;
+        private ImageComponent? _currentImage;
 
         public object ImageContent => _imageContent.Value;
 

@@ -25,6 +25,8 @@
     </b:Interaction.Triggers>
     <DockPanel LastChildFill="True">
         <StatusBar DockPanel.Dock="Bottom">
+            <TextBlock Text="Name:"/>
+            <TextBlock Text="{Binding ImageManager.CurrentImage, FallbackValue=Kein Bild}" Margin="0,0,30,0"/>
             <TextBlock Text="Aktiv:" Margin="0,0,10,0"/>
             <TextBlock Text="{Binding OperationManager.Message}"/>
         </StatusBar>

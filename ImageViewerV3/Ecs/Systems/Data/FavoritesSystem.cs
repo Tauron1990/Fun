@@ -16,16 +16,20 @@ namespace ImageViewerV3.Ecs.Systems.Data
         private readonly IDisposable _eventSubscription;
         private readonly IReadOnlyCollection<string> _favorites;
 
-        public FavoritesSystem(IEventSystem eventSystem, IImageIndexer indexer, IFolderConfiguration folderConfiguration)
+        public FavoritesSystem(IEventSystem eventSystem, IImageIndexer indexer, IFolderConfiguration folderConfiguration, IListManager listManager)
         {
             _folderConfiguration = folderConfiguration;
             _favorites = folderConfiguration.Favorites;
 
-            _eventSubscription = eventSystem.Receive<ToogleFavoritesEvent>().Subscribe(e =>
-            {
-                var component = indexer.GetEntity(e.Index);
-                component.IfHasValue(ic => ic.IsFavorite.Value = !ic.IsFavorite.Value);
-            });
+            var list = listManager.GetList<ImageComponent>();
+
+            _eventSubscription = eventSystem
+               .Receive<ToogleFavoritesEvent>()
+               .Subscribe(e =>
+                          {
+                              var component = indexer.GetEntity(e.Index);
+                              component.IfHasValue(ic => ic.IsFavorite.Value = !ic.IsFavorite.Value);
+                          });
         }
 
         protected override IObservable<(bool favorite, ImageComponent imageComponent)> ReactTo(ImageComponent entity)

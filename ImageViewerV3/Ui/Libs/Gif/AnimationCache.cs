@@ -57,7 +57,7 @@ namespace ImageViewerV3.Ui.Libs.Gif
                 // They can't both be null or Equals would have returned true
                 // and if any is null, the previous would have detected it
                 // ReSharper disable PossibleNullReferenceException
-                if (x.GetType() != y.GetType())
+                if (x!.GetType() != y!.GetType())
                     return false;
                 // ReSharper restore PossibleNullReferenceException
                 var xUri = GetUri(x);

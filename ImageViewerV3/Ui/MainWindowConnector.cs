@@ -53,7 +53,7 @@ namespace ImageViewerV3.Ui
                 _ => MessageBox.Show("Wírklich Löschen?", "Löschen", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes
                     ? new DeleteEvent(ImageManager.CurrentIndex)
                     : null);
-            ToogleFavoriteCommand = BindToEvent(_ => new ToogleFavoritesEvent(ImageManager.CurrentIndex), postExec:() => FilesManager.ForceUpdate());
+            ToogleFavoriteCommand = BindToEvent(_ => new ToogleFavoritesEvent(ImageManager.CurrentIndex));
 
             FullScreen = new DelegateCommand(_ => _fullScreenManager.EnableFullScreen(), _ => true);
         }

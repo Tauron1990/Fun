@@ -55,8 +55,8 @@ namespace ImageViewerV3.Ecs.Services
             var sourceProvider = control.SourceProvider;
 
             sourceProvider.CreatePlayer(new DirectoryInfo(path), "--repeat");
-            sourceProvider.MediaPlayer.EndReached += (s, e) => Task.Run(() => sourceProvider.MediaPlayer.Play());
-            sourceProvider.MediaPlayer.VideoOutChanged += (sender, args) => Task.Run(() => ((VlcMediaPlayer)sender!).Audio.IsMute = true);
+            sourceProvider.MediaPlayer!.EndReached += (s, e) => Task.Run(() => sourceProvider.MediaPlayer.Play());
+            sourceProvider.MediaPlayer!.VideoOutChanged += (sender, args) => Task.Run(() => ((VlcMediaPlayer)sender!).Audio.IsMute = true);
 
             return control;
         }
@@ -88,7 +88,7 @@ namespace ImageViewerV3.Ecs.Services
 
             mem.Position = 0;
             var video = _video.Value;
-            video.SourceProvider.MediaPlayer.Play(mem);
+            video.SourceProvider.MediaPlayer!.Play(mem);
 
             return video;
         }
