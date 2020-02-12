@@ -70,7 +70,7 @@
                         </ListBox>
                     </TabItem>
                     <TabItem Header="Favoriten">
-                        <ListBox ItemsSource="{Binding FilesManager.Favorites}">
+                        <ListBox ItemsSource="{Binding FilesManager.Favorites}" SelectedItem="{Binding ImageManager.CurrentImage}">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <VirtualizingStackPanel/>

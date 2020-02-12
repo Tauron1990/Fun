@@ -41,7 +41,7 @@ namespace ImageViewerV3.Ui.Services
 
             var imageSource = listManager.GetList<ImageComponent>();
 
-            _filter = Track(new ReactiveProperty<SearchQuery>(), nameof(Filter));
+            _filter = Track(new ReactiveProperty<SearchQuery>(initialValue:SearchQuery.Empty), nameof(Filter));
 
             var filter = _filter.Select(sq => new Func<ImageComponent, bool>(sq.FilterAction));
 

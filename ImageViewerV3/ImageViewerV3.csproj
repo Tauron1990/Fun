@@ -43,11 +43,11 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Ookii.Dialogs.Wpf.NETCore" Version="2.0.0" />
     <PackageReference Include="Sprache" Version="2.2.0" />
-    <PackageReference Include="Syncfusion.SfBusyIndicator.WPF" Version="17.4.0.49" />
-    <PackageReference Include="Syncfusion.SfChromelessWindow.WPF" Version="17.4.0.49" />
-    <PackageReference Include="Syncfusion.SfSkinManager.WPF" Version="17.4.0.49" />
-    <PackageReference Include="Syncfusion.Shared.WPF" Version="17.4.0.49" />
-    <PackageReference Include="Syncfusion.Themes.Metro.WPF" Version="17.4.0.49" />
+    <PackageReference Include="Syncfusion.SfBusyIndicator.WPF" Version="17.4.0.47" />
+    <PackageReference Include="Syncfusion.SfChromelessWindow.WPF" Version="17.4.0.47" />
+    <PackageReference Include="Syncfusion.SfSkinManager.WPF" Version="17.4.0.47" />
+    <PackageReference Include="Syncfusion.Shared.WPF" Version="17.4.0.47" />
+    <PackageReference Include="Syncfusion.Themes.Metro.WPF" Version="17.4.0.47" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.8.1" />
     <PackageReference Include="Vlc.DotNet.Core" Version="3.1.0-develop364" />
     <PackageReference Include="Vlc.DotNet.Core.Interops" Version="3.1.0-develop364" />

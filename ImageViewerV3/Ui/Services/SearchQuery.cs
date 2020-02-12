@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using DynamicData.Annotations;
 using ImageViewerV3.Ecs.Components;
 using Sprache;
@@ -17,17 +18,19 @@ namespace ImageViewerV3.Ui.Services
         // mpixels:b10
         // date:>=2019-01-30
 
-        private static readonly SearchQuery Empty = new SearchQuery();
+        public static readonly SearchQuery Empty = new SearchQuery();
 
         public string Term { get; private set; } = string.Empty;
 
         public bool Favorite { get; private set; }
 
+        public string SearchName { get; set; }
+
         public List<string> ExcludedTags { get; } = new List<string>();
 
         public List<string> Tags { get; } = new List<string>();
 
-        public ExpressionValue<int> Rating { get; private set; } 
+        public ExpressionValue<int> Rating { get; private set; }
 
         public ExpressionValue<string> User { get; private set; }
 
@@ -43,17 +46,49 @@ namespace ImageViewerV3.Ui.Services
         {
             try
             {
-                var output = Parser.ParseQuery(new Input(term));
-                return output.WasSuccessful ? output.Value : Empty;
+                var output = Parser.ParseQuery(new Input(term.Trim() + " "));
+
+                if (output.WasSuccessful)
+                {
+                    output.Value.Term = term;
+                    return output.Value;
+                }
+
+                return Empty;
             }
             catch
             {
                 return Empty;
             }
         }
-        
+
         public bool FilterAction(ImageComponent component)
         {
+            if (string.IsNullOrWhiteSpace(Term))
+                return false;
+
+            if (Favorite)
+            {
+                if (!component.IsFavorite.Value)
+                    return false;
+            }
+
+            bool result = true;
+
+            if (ExcludedTags.Count != 0)
+            {
+                result = ExcludedTags.Any(t => component.MetaData.Tags.Contains(t));
+                if (result)
+                    return false;
+            }
+
+            if (Tags.Count != 0)
+            {
+                result = Tags.Any(t => component.MetaData.Tags.Contains(t));
+                if (!result)
+                    return false;
+            }
+
             return true;
         }
 
@@ -61,8 +96,7 @@ namespace ImageViewerV3.Ui.Services
         {
             public TValue Value { get; }
 
-            [AllowNull]
-            public TValue Next { get; }
+            [AllowNull] public TValue Next { get; }
 
             public Expression Expression { get; }
 
@@ -93,7 +127,7 @@ namespace ImageViewerV3.Ui.Services
 
                 public string Next { get; }
 
-                public Expression Expression { get;  }
+                public Expression Expression { get; }
 
                 public CommandEntry(string name, string first, string next, Expression expression)
                 {
@@ -112,34 +146,52 @@ namespace ImageViewerV3.Ui.Services
             // mpixels:b10
             // date:>=2019-01-30
 
-            private static readonly Parser<string> CommandParse = from leading in Parse.WhiteSpace.Many()
-                                                             from first in Parse.Letter.Once().Text()
-                                                             from rest in Parse.LetterOrDigit.Many().Text()
-                                                             from end in Parse.Char(':')
-                                                             from trailing in Parse.WhiteSpace.Many()
-                                                             select first + rest;
+            private static readonly Parser<string> CommandParse = //from leading in Parse.WhiteSpace.Many()
+                TrimInput(
+                from first in Parse.Letter.Once().Text()
+                from rest in Parse.LetterOrDigit.Many().Text()
+                from end in Parse.Char(':')
+                from trailing in Parse.WhiteSpace.Many()
+                select first + rest);
 
             private static readonly Parser<Expression> ExpressionParse =
                 Parse.String("<=").Select(_ => Expression.Smaller)
-                   .Or(Parse.String(">=").Select(_ => Expression.Larger))
-                   .Or(Parse.String("==").Select(_ => Expression.Equal))
-                   .Or(Parse.String("b").Select(_ => Expression.Between));
+                    .Or(Parse.String(">=").Select(_ => Expression.Larger))
+                    .Or(Parse.String("==").Select(_ => Expression.Equal))
+                    .Or(Parse.String("b").Select(_ => Expression.Between));
 
-            private static readonly Parser<string> SegmntParse = Parse.AnyChar.Until(Parse.Char(' ').Or(Parse.Char(';'))).Text();
-            private static readonly Parser<string> ForceSegmntParse = Parse.CharExcept(' ').Until(Parse.Char(';')).Text();
+            private static readonly Parser<string> SegmntParse =
+                from first in Parse.LetterOrDigit.Once().Text()
+                from rest in Parse.CharExcept("; :,<>=").Many().Text()
+                from end in Parse.Char(' ').Or(Parse.Char(';'))
+                select first + rest; //Parse.CharExcept(new[] { ';', ':', ' ', '<', '>', '=' }).Until(Parse.Char(' ').Or(Parse.Char(';'))).Text();
 
             private static readonly Parser<CommandEntry> CommandEntryParse =
                 CommandParse
-                   .Then(c => ExpressionParse.Optional().Select(e => new {Command = c, Expression = e.GetOrElse(Expression.None)}))
-                   .Then(e => SegmntParse.Select(t => new {Command = e.Command, Expression = e.Expression, First = t}))
-                   .Then(e => ForceSegmntParse.Optional().Select(o => new {Command = e.Command, Expression = e.Expression, First = e.First, Next = o.GetOrElse(string.Empty)}))
-                   .Select(r => new CommandEntry(r.Command, r.First, r.Next, r.Expression));
+                    .Then(c => ExpressionParse.Optional().Select(e => new {Command = c, Expression = e.GetOrElse(Expression.None)}))
+                    .Then(e => SegmntParse.Select(t => new {e.Command, e.Expression, First = t}))
+                    .Then(e => SegmntParse.Optional().Select(o => new {e.Command, e.Expression, e.First, Next = o.GetOrElse(string.Empty)}))
+                    .Select(r => new CommandEntry(r.Command, r.First, r.Next, r.Expression));
 
             private static readonly Parser<(bool exclude, string tag)> TagParse =
                 Parse.Char('-').Until(Parse.Char(' ')).Text()
-                   .Or(Parse.AnyChar.Until(Parse.Char(' ')).Text())
-                   .Where(s => !string.IsNullOrWhiteSpace(s))
-                   .Select(s => (s.StartsWith('-'), s));
+                    .Or(Parse.AnyChar.Until(Parse.Char(' ')).Text())
+                    .Where(s => !string.IsNullOrWhiteSpace(s))
+                    .Select(s => (s.StartsWith('-'), s));
+
+            private static readonly Parser<string> FileNameParse =
+                from leading in Parse.WhiteSpace.Many()
+                from first in Parse.Char('<')
+                from rest in Parse.CharExcept('>').Many().Text()
+                from end in Parse.Char('>')
+                select rest;
+            //Parse.Char('<').Until(Parse.Char('>')).Text();
+
+            private static Parser<string> TrimInput(Parser<IEnumerable<char>> input)
+            {
+                return Parse.WhiteSpace.Many()
+                    .Then(_ => input.Text());
+            }
 
             public static readonly Parser<SearchQuery> ParseQuery = ParseQueryMethod;
 
@@ -159,6 +211,14 @@ namespace ImageViewerV3.Ui.Services
                     remainer = result.Remainder;
 
                 } while (sucess);
+                
+
+                var file = FileNameParse(remainer);
+                if (file.WasSuccessful)
+                {
+                    remainer = file.Remainder;
+                    query.SearchName = file.Value;
+                }
 
                 do
                 {
@@ -202,13 +262,16 @@ namespace ImageViewerV3.Ui.Services
                     case "date":
                         query.Date = new ExpressionValue<DateTime>(DateTime.Parse(entry.First), entry.Expression, () => DateTime.Parse(entry.Next));
                         break;
+                    case "favorite":
+                        query.Favorite = bool.Parse(entry.First);
+                        break;
                 }
             }
 
             private static void Apply(SearchQuery query, (bool exclude, string tag) entry)
             {
-                var cleanTag = entry.tag.Replace('_', ' ');
-                if(entry.exclude)
+                var cleanTag = entry.tag.Replace('_', ' ').Trim();
+                if (entry.exclude)
                     query.ExcludedTags.Add(cleanTag.Remove(0, 1));
                 else
                     query.Tags.Add(cleanTag);

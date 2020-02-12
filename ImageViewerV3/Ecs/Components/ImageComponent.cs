@@ -15,7 +15,9 @@ namespace ImageViewerV3.Ecs.Components
 
         public ReactiveProperty<bool> IsFavorite { get; } = new ReactiveProperty<bool>();
 
-        public string[] Tags { get; } = Array.Empty<string>();
+
+        public ImageMetaData MetaData { get; } = new ImageMetaData();
+
 
         public ImageComponent(string filePath, int index)
         {
